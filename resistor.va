@@ -1,0 +1,33 @@
+//  Resistor model with both thermal and flicker noise
+//
+//  This model demonstrates the correct way to model flicker noise. It gives
+//  correct results in both noise and pnoise analyses as described in "Flicker
+//  Noise Formulations in Compact Models", to be published in Transactions on
+//  Computer-Aided Design of Integrated Circuits and Systems some time in 2020.
+
+`include "disciplines.vams"
+`include "constants.vams"
+
+module res_va(a,b);
+  inout      a, b;
+  electrical a, b;
+  parameter real R  = 100.0    from (0.0:inf);
+  parameter real KF =   1.0e-6 from [0.0:inf);
+  parameter real AF =   2.0    from (0.1:inf);
+  parameter real EF =   1.0    from (-inf:inf);
+
+  analog function integer sign;
+    input arg;
+    real  arg;
+    sign = arg >= 0 ? +1 : -1;
+  endfunction
+
+  analog begin : vaResistor
+    real Ir, Pn;
+    Ir      = V(a,b)/R;
+    Pn      = KF*pow(abs(Ir), AF);
+    I(a,b) <+ Ir;
+    I(a,b) <+ white_noise(4.0*`P_K*$temperature/R, "thermal");
+    I(a,b) <+ flicker_noise(sign(Ir)*Pn, EF, "flicker");
+  end
+endmodule

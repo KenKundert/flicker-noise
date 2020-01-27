@@ -1,0 +1,180 @@
+#!/usr/bin/env python3
+# Description {{{1
+"""
+Simulate Flicker Noise of BSIM4 transistor with PNoise Analysis
+
+Usage:
+    runBSIM [options]
+
+Options:
+    -v, --verbose  turn on verbose mode
+
+Run a PNoise simulation on BSIM4 transistors, testing the implementation
+of the flicker noise model (selected by model parameter fnoimod). In
+certain simulators at the time this example was created, the noise spectra
+are qualitatively different: the location of the spikes differs, depending
+on fnoimod.
+
+For fnoimod=1, the simulation results are correct: the flicker noise is
+up-converted to be centered around f0. The drain-source voltage is small,
+so that the transistor is in the linear region. For fnoimod=0, the noise
+spectrum differs: the spikes are at different locations, whereas we 
+expect only different amplitudes.
+
+The simulation results were reported in the paper "Flicker Noise Formulations
+in Verilog-A Compact Models" by G. J. Coram, C. C. McAndrew, K. K. Gullapalli,
+and K. S. Kundert. It has been submitted for publication in IEEE Trans. CAD.
+
+The frequency and amplitude of the excitation are set by the variables f0 and
+ampl in this program.
+
+
+Parameters:
+{parameters}
+"""
+
+# Imports {{{1
+from docopt import docopt
+from inform import Inform, Error, comment, display, fatal, os_error
+import matplotlib.pyplot as plt
+from matplotlib.ticker import FuncFormatter
+from quantiphy import Quantity
+from psf_utils import PSF
+from shlib import Run, to_path, render_command, set_prefs as shlib_set_prefs
+from textwrap import dedent
+import re
+
+# Globals {{{1
+Quantity.set_prefs(prec='full', spacer='', unity_sf='_')
+shlib_set_prefs(use_inform=True)
+
+spectre_exe = "spectre"                         # Spectre executable
+netlist_file = to_path("pnbsim.scs")            # Spectre netlist file
+log_file = netlist_file.with_suffix('.log')     # Spectre logfile
+results_dir = netlist_file.with_suffix('.raw')  # Simulation results directory
+psf_file = results_dir / 'pnoise.pnoise'        # PNoise PSF file
+
+parameters = """\
+    f0 (fₒ)= 2**17 "Hz"             # frequency of the sinusoid
+    ptsPerCycle = 64                # number of desired point per cycle
+    cycles = 2048*16                # total number of cycles
+    T = 1.0/f0 "s"                  # period of one cycle
+    dt = T/ptsPerCycle "s"          # (desired) time between transient simulation samples
+    tstop = T*cycles "s"            # stop time for transient simulation
+    fmin = 1.0*int(1.0/tstop) "Hz"  # minimum frequency for analysis
+    fmax = f0*ptsPerCycle/2.0 "Hz"  # maximum frequency for analysis
+    ptsPerDec = 2000                # number of frequency points per decade
+                                    # for the noise analysis
+    ampl = 100mV                    # amplitude of the sinusoid
+"""
+params = Quantity.extract(parameters)
+globals().update(params)
+
+netlist = dedent(f"""
+    // BSIM flicker noise simulations
+
+    simulator lang=spectre
+
+    model nchbsim4_f0 bsim4      fnoimod=0 kf=1e-23 af=2
+    model nchbsim4_f1 bsim4      fnoimod=1
+
+    VX (x 0) vsource type=sine dc=1.0 sinedc=0.0 ampl={ampl} freq={f0}
+    ED (d 0 x 0) vcvs gain=1
+    ES (s 0 x 0) vcvs gain=-1
+    VG (g 0) vsource dc=3
+    VB (b 0) vsource dc=-0.2
+
+    MBSIM4f0 (d_f0 g s b) nchbsim4_f0 l=1um w=10um
+    MBSIM4f1 (d_f1 g s b) nchbsim4_f1 l=1um w=10um
+
+    iRESf0 (d d_f0) vsource dc=0.0
+    iRESf1 (d d_f1) vsource dc=0.0
+    Rout (noise 0) resistor isnoisy=no r=100kOhm
+    Hnoise (noise  0) pccvs coeffs=[0 1 1] probes=[iRESf0 iRESf1]
+
+    noise (noise 0) noise start={fmin} stop={fmax} dec={ptsPerDec}
+    pop pss fund={f0}
+    pnoise (noise 0) pnoise start={fmin} stop={fmax} dec={ptsPerDec} maxsideband=10
+""")
+
+sim_cmd = (spectre_exe, '=log', log_file, '-format', 'psfascii', netlist_file)
+
+# Initialize {{{1
+cmdline = docopt(__doc__.format(parameters=parameters))
+verbose = cmdline['--verbose']
+Inform(verbose=verbose, logfile=True, colorscheme=None)
+
+comment(f'Parameters:')
+for k, v in params.items():
+    comment(f'    {v:S}')
+
+# Simulate {{{1
+try:
+    comment('Running:', render_command(sim_cmd, {'=log': 1, '-format': 1}))
+    netlist_file.write_text(netlist.lstrip())
+    spectre = Run(sim_cmd, 'soEW0')
+except OSError as e:
+    fatal(os_error(e))
+except Error as e:
+    if e.stdout:
+        comment(e.stdout)
+    e.terminate(
+        culprit = spectre_exe,
+        codicil = f'See {log_file} for more information.'
+    )
+
+# Plot results {{{1
+Quantity.set_prefs(
+    prec = 2,
+    map_sf = Quantity.map_sf_to_sci_notation,
+    output_sf = 'YZEPTGMkmunpfazy',
+    minus = Quantity.minus_sign,
+    spacer = ' ',
+    unity_sf='',
+)
+unit_maps = [
+    (r'sqrt\(([^)]+)\)', r'√\1'),
+    (r'\^2', r'²'),
+]
+
+def fix_units(u):
+    for s, r in unit_maps:
+        u = re.sub(s, r, u)
+    return u
+
+try:
+    # Extract data from psf file
+    results = PSF(psf_file, sep=':')
+    sweep = results.get_sweep()
+    x_name = sweep.name
+    x_units = sweep.units
+    x = sweep.abscissa
+    f0_sig = results.get_signal('MBSIM4f0:fn')
+    y_units = fix_units(f0_sig.units)
+    y_f0 = f0_sig.ordinate
+    f1_sig = results.get_signal('MBSIM4f1:fn')
+    y_f1 = f1_sig.ordinate
+
+    # build axis formatters
+    x_axis_formatter = FuncFormatter(
+        lambda v, p: Quantity(v, x_units).render()
+    )
+    y_axis_formatter = FuncFormatter(
+        lambda v, p: Quantity(v, y_units).render()
+    )
+
+    # create the pnoise plot
+    figure, axes = plt.subplots(1, 1)
+    axes.plot(x, y_f0, linewidth=2, label='fnoimod0')
+    axes.plot(x, y_f1, linewidth=2, label='fnoimod1')
+    axes.legend(frameon=False, loc='best')
+    axes.set_xscale('log' if results.log_x(sweep) else 'linear')
+    axes.set_yscale('log' if results.log_y(sweep) else 'linear')
+    axes.xaxis.set_major_formatter(x_axis_formatter)
+    axes.yaxis.set_major_formatter(y_axis_formatter)
+    plt.suptitle(f'Flicker Noise of BSIM4 Transistors with {f0} Sinusoidal Drive')
+    plt.show()
+except Error as e:
+    e.terminate()
+except KeyboardInterrupt as e:
+    done()

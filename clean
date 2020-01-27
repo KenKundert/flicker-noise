@@ -1,0 +1,6 @@
+#!/bin/sh
+
+rm -rf {pnoise,pnbsim}.{ahdlSimDB,raw,log}
+rm -rf .{runPnoise,runBSIM}.log
+rm -rf .*.Linux-64.dep *.ahdlcmi
+rm -rf build dist flicker_noise.egg-info

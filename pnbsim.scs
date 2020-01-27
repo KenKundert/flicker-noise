@@ -1,0 +1,24 @@
+// BSIM flicker noise simulations
+
+simulator lang=spectre
+
+model nchbsim4_f0 bsim4      fnoimod=0 kf=1e-23 af=2
+model nchbsim4_f1 bsim4      fnoimod=1
+
+VX (x 0) vsource type=sine dc=1.0 sinedc=0.0 ampl=100mV freq=131.072kHz
+ED (d 0 x 0) vcvs gain=1
+ES (s 0 x 0) vcvs gain=-1
+VG (g 0) vsource dc=3
+VB (b 0) vsource dc=-0.2
+
+MBSIM4f0 (d_f0 g s b) nchbsim4_f0 l=1um w=10um
+MBSIM4f1 (d_f1 g s b) nchbsim4_f1 l=1um w=10um
+
+iRESf0 (d d_f0) vsource dc=0.0
+iRESf1 (d d_f1) vsource dc=0.0
+Rout (noise 0) resistor isnoisy=no r=100kOhm
+Hnoise (noise  0) pccvs coeffs=[0 1 1] probes=[iRESf0 iRESf1]
+
+noise (noise 0) noise start=4_Hz stop=4.194304MHz dec=2k
+pop pss fund=131.072kHz
+pnoise (noise 0) pnoise start=4_Hz stop=4.194304MHz dec=2k maxsideband=10

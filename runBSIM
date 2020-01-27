@@ -35,7 +35,7 @@ Parameters:
 
 # Imports {{{1
 from docopt import docopt
-from inform import Inform, Error, comment, display, fatal, os_error
+from inform import Inform, Error, comment, display, fatal, os_error, done
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
 from quantiphy import Quantity
@@ -53,6 +53,9 @@ netlist_file = to_path("pnbsim.scs")            # Spectre netlist file
 log_file = netlist_file.with_suffix('.log')     # Spectre logfile
 results_dir = netlist_file.with_suffix('.raw')  # Simulation results directory
 psf_file = results_dir / 'pnoise.pnoise'        # PNoise PSF file
+plot_bounds = dict(left=0.15, right=0.98)
+    # need to shift the figure a bit to the right because of y-axis labels
+use_sci_notation = False  # alternative is to use SI scale factors
 
 parameters = """\
     f0 (fₒ)= 2**17 "Hz"             # frequency of the sinusoid
@@ -159,12 +162,20 @@ try:
     x_axis_formatter = FuncFormatter(
         lambda v, p: Quantity(v, x_units).render()
     )
-    y_axis_formatter = FuncFormatter(
-        lambda v, p: Quantity(v, y_units).render()
-    )
+    if use_sci_notation:
+        plot_bounds = dict(left=0.2, right=0.98)
+        y_axis_formatter = FuncFormatter(
+            lambda v, p: Quantity(v, y_units).render(form='eng')
+        )
+    else:
+        plot_bounds = dict(left=0.15, right=0.98)
+        y_axis_formatter = FuncFormatter(
+            lambda v, p: Quantity(v, y_units).render(form='si')
+        )
 
     # create the pnoise plot
     figure, axes = plt.subplots(1, 1)
+    figure.subplots_adjust(**plot_bounds)
     axes.plot(x, y_f0, linewidth=2, label='fnoimod0')
     axes.plot(x, y_f1, linewidth=2, label='fnoimod1')
     axes.legend(frameon=False, loc='best')

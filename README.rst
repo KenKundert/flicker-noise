@@ -46,8 +46,8 @@ My rather old version of Spectre (15.1.0) generated the following results:
 
 Resistor:
 
-    .. image:: results/resistor.svg
+    .. image:: figures/resistor.svg
 
 BSIM:
 
-    .. image:: results/bsim.svg
+    .. image:: figures/bsim.svg

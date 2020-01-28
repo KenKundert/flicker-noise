@@ -30,7 +30,17 @@ ampl in this program.
 
 
 Parameters:
-{parameters}
+    f0 (fₒ)= 2**17 "Hz"             # frequency of the sinusoid
+    ptsPerCycle = 64                # number of desired point per cycle
+    cycles = 2048*16                # total number of cycles
+    T = 1.0/f0 "s"                  # period of one cycle
+    dt = T/ptsPerCycle "s"          # (desired) time between transient simulation samples
+    tstop = T*cycles "s"            # stop time for transient simulation
+    fmin = 1.0*int(1.0/tstop) "Hz"  # minimum frequency for analysis
+    fmax = f0*ptsPerCycle/2.0 "Hz"  # maximum frequency for analysis
+    ptsPerDec = 2000                # number of frequency points per decade
+                                    # for the noise analysis
+    ampl = 100mV                    # amplitude of the sinusoid
 """
 
 # Imports {{{1
@@ -57,20 +67,7 @@ plot_bounds = dict(left=0.15, right=0.98)
     # need to shift the figure a bit to the right because of y-axis labels
 use_sci_notation = False  # alternative is to use SI scale factors
 
-parameters = """\
-    f0 (fₒ)= 2**17 "Hz"             # frequency of the sinusoid
-    ptsPerCycle = 64                # number of desired point per cycle
-    cycles = 2048*16                # total number of cycles
-    T = 1.0/f0 "s"                  # period of one cycle
-    dt = T/ptsPerCycle "s"          # (desired) time between transient simulation samples
-    tstop = T*cycles "s"            # stop time for transient simulation
-    fmin = 1.0*int(1.0/tstop) "Hz"  # minimum frequency for analysis
-    fmax = f0*ptsPerCycle/2.0 "Hz"  # maximum frequency for analysis
-    ptsPerDec = 2000                # number of frequency points per decade
-                                    # for the noise analysis
-    ampl = 100mV                    # amplitude of the sinusoid
-"""
-params = Quantity.extract(parameters)
+params = Quantity.extract(__doc__)
 globals().update(params)
 
 netlist = dedent(f"""
@@ -103,7 +100,7 @@ netlist = dedent(f"""
 sim_cmd = (spectre_exe, '=log', log_file, '-format', 'psfascii', netlist_file)
 
 # Initialize {{{1
-cmdline = docopt(__doc__.format(parameters=parameters))
+cmdline = docopt(__doc__)
 verbose = cmdline['--verbose']
 Inform(verbose=verbose, logfile=True, colorscheme=None)
 

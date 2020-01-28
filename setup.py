@@ -6,7 +6,7 @@
 
 from setuptools import setup
 
-dependencies = 'docopt matplotlib numpy inform quantiphy psf-utils>=0.3 shlib'
+dependencies = 'docopt matplotlib numpy inform quantiphy>=2.9 psf-utils>=0.3 shlib'
 
 setup(
     name='flicker-noise',

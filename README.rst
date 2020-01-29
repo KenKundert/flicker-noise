@@ -51,7 +51,28 @@ My rather old version of Spectre (15.1.0) generated the following results:
 Resistor:
 
     .. image:: figures/resistor.svg
+        :width: 600px
+
+The above shows the flicker noise produced by Spectre's built-in resistor 
+(*RESref*) and the proposed Verilog-A model (*RESva*). In this case the flicker 
+noise of the built-in resistor model was implemented correctly and both agree.
+
+Broken Resistor:
+
+    .. image:: figures/resistor-broken.svg
+        :width: 600px
+
+The above shows the flicker noise produced by Spectre's built-in resistor 
+(*RESref*) and the traditional Verilog-A model (*RESva*). In this case the 
+flicker noise of the Verilog-A model is incorrect and the two models 
+disagree.
 
 BSIM:
 
     .. image:: figures/bsim.svg
+        :width: 600px
+
+The above shows two different flicker noise models implemented in the built-in 
+BSIM4 model in Spectre.  *fnoimod=1* was implemented correctly while *fnoimod=0* 
+was not.
+

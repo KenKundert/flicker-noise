@@ -2,8 +2,8 @@ Flicker Noise Formulations in Compact Models
 ============================================
 
 :Author: Geoffrey Coram, Colin McAndrew, Kiran Gullapalli and Ken Kundert
-:Version: 0.0.0
-:Released: 2020-00-00
+:Version: 1.0.0
+:Released: 2020-01-29
 
 Includes a resistor model that demonstrates how to properly model flicker noise 
 in Verilog-A as described in "Flicker Noise Formulations in Compact Models", to 

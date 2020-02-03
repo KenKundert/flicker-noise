@@ -6,8 +6,9 @@ Flicker Noise Formulations in Compact Models
 :Released: 2020-01-29
 
 Includes a resistor model that demonstrates how to properly model flicker noise 
-in Verilog-A as described in "Flicker Noise Formulations in Compact Models", to 
-be published in Transactions on Computer-Aided Design of Integrated Circuits and
+in Verilog-A as described in `Flicker Noise Formulations in Compact Models 
+<https://ieeexplore.ieee.org/document/8957705>`_, to be published in 
+Transactions on Computer-Aided Design of Integrated Circuits and
 Systems some time in 2020.
 
 Also included are two circuits. The first is a simple test circuit for the 

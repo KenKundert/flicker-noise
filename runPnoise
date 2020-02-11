@@ -29,7 +29,7 @@ of flicker noise, found in broken.va, is used instead. The absolute value
 causes loss of the sign of the modulation, and you get the incorrect results
 shown in Fig. 2 in the above paper.
 
-Parameters:
+Simulation Parameters:
     f0 (fₒ)= 2**17 "Hz"             # frequency of the sinusoid
     ptsPerCycle = 64                # number of desired point per cycle
     cycles = 2048*16                # total number of cycles
@@ -61,6 +61,7 @@ plot_bounds = dict(left=0.15, right=0.98)
     # need to shift the figure a bit to the right because of y-axis labels
 use_sci_notation = False  # alternative is to use SI scale factors
 
+# Add the simulation parameters to the local name space
 params = Quantity.extract(__doc__)
 globals().update(params)
 

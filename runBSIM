@@ -29,7 +29,7 @@ The frequency and amplitude of the excitation are set by the variables f0 and
 ampl in this program.
 
 
-Parameters:
+Simulation Parameters:
     f0 (fₒ)= 2**17 "Hz"             # frequency of the sinusoid
     ptsPerCycle = 64                # number of desired point per cycle
     cycles = 2048*16                # total number of cycles
@@ -67,6 +67,7 @@ plot_bounds = dict(left=0.15, right=0.98)
     # need to shift the figure a bit to the right because of y-axis labels
 use_sci_notation = False  # alternative is to use SI scale factors
 
+# Add the simulation parameters to the local name space
 params = Quantity.extract(__doc__)
 globals().update(params)
 

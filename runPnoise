@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # Description {{{1
 """
-Simulate Flicker Noise with PNoise Analysis
+Simulate Resistor Flicker Noise with PNoise Analysis
 
 Usage:
     runPnoise [options]
@@ -23,11 +23,11 @@ Gullapalli, and K. S. Kundert. It has been accepted for publication in IEEE
 Trans. CAD some time in 2020.
 
 The file resistor.va preserves the sign of the noise modulation, so that the
-simuation results are correct: the flicker noise is up-converted to be centered
+simulation results are correct: the flicker noise is up-converted to be centered
 around f0.  With the command-line option --broken, the incorrect implementation
-of flicker noise, found in broken.va, is used instead. The absolute value 
-causes loss of the sign of the modulation, and you get the incorrect results
-shown in Fig. 2 in the above paper.
+of flicker noise, found in broken.va, is used instead. The absolute value causes 
+loss of the sign of the modulation and you get the incorrect results shown in 
+Fig. 2 in the above paper.
 
 Simulation Parameters:
     f0 (fₒ)= 2**17 "Hz"             # frequency of the sinusoid
@@ -54,61 +54,65 @@ from shlib import Run, to_path, render_command, set_prefs as shlib_set_prefs
 from textwrap import dedent
 import re
 
-# Globals {{{1
-Quantity.set_prefs(prec='full', spacer='', unity_sf='_')
-shlib_set_prefs(use_inform=True)
-plot_bounds = dict(left=0.15, right=0.98)
-    # need to shift the figure a bit to the right because of y-axis labels
-use_sci_notation = False  # alternative is to use SI scale factors
-
-# Add the simulation parameters to the local name space
-params = Quantity.extract(__doc__)
-globals().update(params)
-
-# Initialize {{{1
+# Initialization {{{1
 cmdline = docopt(__doc__)
 verbose = cmdline['--verbose']
 broken = cmdline['--broken']
 Inform(verbose=verbose, logfile=True, colorscheme=None)
+shlib_set_prefs(use_inform=True)
 
+# Globals {{{1
+# paths {{{2
 spectre_exe = "spectre"                         # Spectre executable
-if (broken):
-    model_file = to_path("broken.va")           # broken Verilog-A model file
-else:
-    model_file = to_path("resistor.va")         # Verilog-A model file
+working_model_file = to_path("resistor.va")     # working Verilog-A model file
+broken_model_file = to_path("broken.va")        # broken Verilog-A model file
 netlist_file = to_path("pnoise.scs")            # Spectre netlist file
 log_file = netlist_file.with_suffix('.log')     # Spectre logfile
 results_dir = netlist_file.with_suffix('.raw')  # Simulation results directory
 psf_file = results_dir / 'pnoise.pnoise'        # PNoise PSF file
-
-netlist = dedent(f"""
-    // Resistor flicker noise simulations
-
-    simulator lang=spectre
-
-    ahdl_include "{model_file!s}"
-
-    model rref resistor kf=1.0e-6 af=2 // to match res_va
-
-    Vin    (n 0) vsource type=sine dc=1.0 sinedc=0.0 ampl={ampl} freq={f0}
-    R1     (n 0) res_va
-    R2     (n 0) rref r=100.0
-
-    noise  noise start={fmin} stop={fmax} dec={ptsPerDec} oprobe=Vin
-    pss    pss fund={f0}
-    pnoise pnoise start={fmin} stop={fmax} dec={ptsPerDec} maxsideband=10 oprobe=Vin
-""")
-
 sim_cmd = (spectre_exe, '=log', log_file, '-format', 'psfascii', netlist_file)
 
+# plotting preferences {{{2
+plot_bounds = dict(left=0.15, right=0.98)
+    # need to shift the figure a bit to the right because of y-axis labels
+use_sci_notation = False  # alternative is to use SI scale factors
+
+# simulation parameters {{{2
+# Extract the simulation parameters from description and add them as local vars
+params = Quantity.extract(__doc__)
+globals().update(params)
+
+# netlist {{{2
+with Quantity.prefs(prec='full', spacer='', unity_sf='_'):
+    model_file = broken_model_file if broken else working_model_file
+    netlist = dedent(f"""
+        // Resistor flicker noise simulations
+
+        simulator lang=spectre
+
+        ahdl_include "{model_file!s}"
+
+        model rref resistor kf=1.0e-6 af=2 // to match res_va
+
+        Vin    (n 0) vsource type=sine dc=1.0 sinedc=0.0 ampl={ampl} freq={f0}
+        R1     (n 0) res_va
+        R2     (n 0) rref r=100.0
+
+        noise  noise start={fmin} stop={fmax} dec={ptsPerDec} oprobe=Vin
+        pss    pss fund={f0}
+        pnoise pnoise start={fmin} stop={fmax} dec={ptsPerDec} maxsideband=10 oprobe=Vin
+    """)
+    netlist_file.write_text(netlist.lstrip())
+
+# output parameters if verbose {{{2
 comment(f'Parameters:')
 for k, v in params.items():
     comment(f'    {v:S}')
 
 # Simulate {{{1
 try:
-    comment('Running:', render_command(sim_cmd, {'=log': 1, '-format': 1}))
-    netlist_file.write_text(netlist.lstrip())
+    comment('\nRunning:')
+    comment('   ', render_command(sim_cmd, {'=log': 1, '-format': 1}))
     spectre = Run(sim_cmd, 'soEW0')
 except OSError as e:
     fatal(os_error(e))
@@ -129,11 +133,12 @@ Quantity.set_prefs(
     spacer = ' ',
     unity_sf='',
 )
+
+# map noise units to simpler unicode representations
 unit_maps = [
     (r'sqrt\(([^)]+)\)', r'√\1'),
     (r'\^2', r'²'),
 ]
-
 def fix_units(u):
     for s, r in unit_maps:
         u = re.sub(s, r, u)

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # Description {{{1
 """
-Simulate Flicker Noise of BSIM4 transistor with PNoise Analysis
+Simulate BSIM4 Flicker Noise with PNoise Analysis
 
 Usage:
     runBSIM [options]
@@ -54,65 +54,70 @@ from shlib import Run, to_path, render_command, set_prefs as shlib_set_prefs
 from textwrap import dedent
 import re
 
-# Globals {{{1
-Quantity.set_prefs(prec='full', spacer='', unity_sf='_')
+# Initialization {{{1
+cmdline = docopt(__doc__)
+verbose = cmdline['--verbose']
+Inform(verbose=verbose, logfile=True, colorscheme=None)
 shlib_set_prefs(use_inform=True)
 
+# Globals {{{1
+# paths {{{2
 spectre_exe = "spectre"                         # Spectre executable
 netlist_file = to_path("pnbsim.scs")            # Spectre netlist file
 log_file = netlist_file.with_suffix('.log')     # Spectre logfile
 results_dir = netlist_file.with_suffix('.raw')  # Simulation results directory
 psf_file = results_dir / 'pnoise.pnoise'        # PNoise PSF file
+sim_cmd = (spectre_exe, '=log', log_file, '-format', 'psfascii', netlist_file)
+
+# plotting preferences {{{2
 plot_bounds = dict(left=0.15, right=0.98)
     # need to shift the figure a bit to the right because of y-axis labels
 use_sci_notation = False  # alternative is to use SI scale factors
 
-# Add the simulation parameters to the local name space
+# simulation parameters {{{2
+# Extract the simulation parameters from description and add them as local vars
 params = Quantity.extract(__doc__)
 globals().update(params)
 
-netlist = dedent(f"""
-    // BSIM flicker noise simulations
+# netlist {{{2
+with Quantity.prefs(prec='full', spacer='', unity_sf='_'):
+    netlist = dedent(f"""
+        // BSIM flicker noise simulations
 
-    simulator lang=spectre
+        simulator lang=spectre
 
-    model nchbsim4_f0 bsim4      fnoimod=0 kf=1e-23 af=2
-    model nchbsim4_f1 bsim4      fnoimod=1
+        model nchbsim4_f0 bsim4      fnoimod=0 kf=1e-23 af=2
+        model nchbsim4_f1 bsim4      fnoimod=1
 
-    VX (x 0) vsource type=sine dc=1.0 sinedc=0.0 ampl={ampl} freq={f0}
-    ED (d 0 x 0) vcvs gain=1
-    ES (s 0 x 0) vcvs gain=-1
-    VG (g 0) vsource dc=3
-    VB (b 0) vsource dc=-0.2
+        VX (x 0) vsource type=sine dc=1.0 sinedc=0.0 ampl={ampl} freq={f0}
+        ED (d 0 x 0) vcvs gain=1
+        ES (s 0 x 0) vcvs gain=-1
+        VG (g 0) vsource dc=3
+        VB (b 0) vsource dc=-0.2
 
-    MBSIM4f0 (d_f0 g s b) nchbsim4_f0 l=1um w=10um
-    MBSIM4f1 (d_f1 g s b) nchbsim4_f1 l=1um w=10um
+        MBSIM4f0 (d_f0 g s b) nchbsim4_f0 l=1um w=10um
+        MBSIM4f1 (d_f1 g s b) nchbsim4_f1 l=1um w=10um
 
-    iRESf0 (d d_f0) vsource dc=0.0
-    iRESf1 (d d_f1) vsource dc=0.0
-    Rout (noise 0) resistor isnoisy=no r=100kOhm
-    Hnoise (noise  0) pccvs coeffs=[0 1 1] probes=[iRESf0 iRESf1]
+        iRESf0 (d d_f0) vsource dc=0.0
+        iRESf1 (d d_f1) vsource dc=0.0
+        Rout (noise 0) resistor isnoisy=no r=100kOhm
+        Hnoise (noise  0) pccvs coeffs=[0 1 1] probes=[iRESf0 iRESf1]
 
-    noise (noise 0) noise start={fmin} stop={fmax} dec={ptsPerDec}
-    pop pss fund={f0}
-    pnoise (noise 0) pnoise start={fmin} stop={fmax} dec={ptsPerDec} maxsideband=10
-""")
+        noise (noise 0) noise start={fmin} stop={fmax} dec={ptsPerDec}
+        pop pss fund={f0}
+        pnoise (noise 0) pnoise start={fmin} stop={fmax} dec={ptsPerDec} maxsideband=10
+    """)
+    netlist_file.write_text(netlist.lstrip())
 
-sim_cmd = (spectre_exe, '=log', log_file, '-format', 'psfascii', netlist_file)
-
-# Initialize {{{1
-cmdline = docopt(__doc__)
-verbose = cmdline['--verbose']
-Inform(verbose=verbose, logfile=True, colorscheme=None)
-
+# output parameters if verbose {{{2
 comment(f'Parameters:')
 for k, v in params.items():
     comment(f'    {v:S}')
 
 # Simulate {{{1
 try:
-    comment('Running:', render_command(sim_cmd, {'=log': 1, '-format': 1}))
-    netlist_file.write_text(netlist.lstrip())
+    comment('\nRunning:')
+    comment('   ', render_command(sim_cmd, {'=log': 1, '-format': 1}))
     spectre = Run(sim_cmd, 'soEW0')
 except OSError as e:
     fatal(os_error(e))
@@ -133,11 +138,12 @@ Quantity.set_prefs(
     spacer = ' ',
     unity_sf='',
 )
+
+# map noise units to simpler unicode representations
 unit_maps = [
     (r'sqrt\(([^)]+)\)', r'√\1'),
     (r'\^2', r'²'),
 ]
-
 def fix_units(u):
     for s, r in unit_maps:
         u = re.sub(s, r, u)

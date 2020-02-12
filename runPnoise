@@ -56,9 +56,9 @@ import re
 
 # Initialization {{{1
 cmdline = docopt(__doc__)
-verbose = cmdline['--verbose']
+
 broken = cmdline['--broken']
-Inform(verbose=verbose, logfile=True, colorscheme=None)
+Inform(verbose=cmdline['--verbose'], logfile=True, colorscheme=None)
 shlib_set_prefs(use_inform=True)
 
 # Globals {{{1
@@ -68,13 +68,11 @@ working_model_file = to_path("resistor.va")     # working Verilog-A model file
 broken_model_file = to_path("broken.va")        # broken Verilog-A model file
 netlist_file = to_path("pnoise.scs")            # Spectre netlist file
 log_file = netlist_file.with_suffix('.log')     # Spectre logfile
-results_dir = netlist_file.with_suffix('.raw')  # Simulation results directory
+results_dir = netlist_file.with_suffix('.raw')  # simulation results directory
 psf_file = results_dir / 'pnoise.pnoise'        # PNoise PSF file
 sim_cmd = (spectre_exe, '=log', log_file, '-format', 'psfascii', netlist_file)
 
 # plotting preferences {{{2
-plot_bounds = dict(left=0.15, right=0.98)
-    # need to shift the figure a bit to the right because of y-axis labels
 use_sci_notation = False  # alternative is to use SI scale factors
 
 # simulation parameters {{{2
@@ -109,7 +107,7 @@ comment(f'Parameters:')
 for k, v in params.items():
     comment(f'    {v:S}')
 
-# Simulate {{{1
+# simulate {{{1
 try:
     comment('\nRunning:')
     comment('   ', render_command(sim_cmd, {'=log': 1, '-format': 1}))
@@ -124,14 +122,12 @@ except Error as e:
         codicil = f'See {log_file} for more information.'
     )
 
-# Plot results {{{1
+# plot results {{{1
 Quantity.set_prefs(
     prec = 2,
     map_sf = Quantity.map_sf_to_sci_notation,
     output_sf = 'YZEPTGMkmunpfazy',
     minus = Quantity.minus_sign,
-    spacer = ' ',
-    unity_sf='',
 )
 
 # map noise units to simpler unicode representations
@@ -162,19 +158,20 @@ try:
         lambda v, p: Quantity(v, x_units).render()
     )
     if use_sci_notation:
-        plot_bounds = dict(left=0.2, right=0.98)
+        adjust_plot_bounds = dict(left=0.2, right=0.98)
         y_axis_formatter = FuncFormatter(
             lambda v, p: Quantity(v, y_units).render(form='eng')
         )
     else:
-        plot_bounds = dict(left=0.15, right=0.98)
+        adjust_plot_bounds = dict(left=0.15, right=0.98)
         y_axis_formatter = FuncFormatter(
             lambda v, p: Quantity(v, y_units).render(form='si')
         )
 
     # create the pnoise plot
     figure, axes = plt.subplots(1, 1)
-    figure.subplots_adjust(**plot_bounds)
+    figure.subplots_adjust(**adjust_plot_bounds)
+        # need to shift the figure a bit to the right because of y-axis labels
     axes.plot(x, y_va, linewidth=2, label='RESva')
     axes.plot(x, y_ref, linewidth=2, label='RESref')
     axes.legend(frameon=False, loc='best')

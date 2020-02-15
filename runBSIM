@@ -108,9 +108,10 @@ with Quantity.prefs(prec='full', spacer='', unity_sf='_'):
     netlist_file.write_text(netlist.lstrip())
 
 # output parameters if verbose {{{2
-comment(f'Parameters:')
-for k, v in params.items():
-    comment(f'    {v:S}')
+with Quantity.prefs(show_label = 'f', label_fmt_full = '{V:<18}  -- {d}'):
+    comment(f'Parameters:')
+    for k, v in params.items():
+        comment(f'    {v:S}')
 
 # simulate {{{1
 try:

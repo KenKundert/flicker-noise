@@ -113,8 +113,6 @@ try:
     comment('\nRunning:')
     comment('   ', render_command(sim_cmd, {'=log': 1, '-format': 1}))
     spectre = Run(sim_cmd, 'soEW0')
-except OSError as e:
-    fatal(os_error(e))
 except Error as e:
     if e.stdout:
         comment(e.stdout)
@@ -124,13 +122,6 @@ except Error as e:
     )
 
 # plot results {{{1
-Quantity.set_prefs(
-    prec = 2,
-    map_sf = Quantity.map_sf_to_sci_notation,
-    output_sf = 'YZEPTGMkmunpfazy',
-    minus = Quantity.minus_sign,
-)
-
 # map noise units to simpler unicode representations
 unit_maps = [
     (r'sqrt\(([^)]+)\)', r'√\1'),
@@ -181,7 +172,13 @@ try:
     axes.xaxis.set_major_formatter(x_axis_formatter)
     axes.yaxis.set_major_formatter(y_axis_formatter)
     plt.suptitle(f'Flicker Noise of Resistor with {f0} Sinusoidal Drive')
-    plt.show()
+    with Quantity.prefs(
+        prec = 2,
+        map_sf = Quantity.map_sf_to_sci_notation,
+        output_sf = 'YZEPTGMkmunpfazy',
+        minus = Quantity.minus_sign,
+    ):
+        plt.show()
 except Error as e:
     e.terminate()
 except KeyboardInterrupt as e:

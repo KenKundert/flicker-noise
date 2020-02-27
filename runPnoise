@@ -16,22 +16,24 @@ flicker noise driven by a sinusoidal excitation.
 The frequency and amplitude of the excitation are set by the variables f0 and
 ampl in this program.
 
-The model "res_va" in the resistor.va file is used as is the built-in spectre
+The model "res_va" in the resistor.va file is used, as is the built-in spectre
 resistor model. The simulation results match those in the paper "Flicker Noise
 Formulations in Verilog-A Compact Models" by G. J. Coram, C. C. McAndrew, K. K.
 Gullapalli, and K. S. Kundert. It has been accepted for publication in IEEE
 Trans. CAD some time in 2020.
 
-The file resistor.va preserves the sign of the noise modulation, so that the
-simulation results are correct: the flicker noise is up-converted to be centered
-around f0.  With the command-line option --broken, the incorrect implementation
-of flicker noise, found in broken.va, is used instead. The absolute value causes 
-loss of the sign of the modulation and you get the incorrect results shown in 
-Fig. 2 in the above paper.
+The file resistor.va preserves the sign of the modulation.  The simulation
+results are correct with the flicker noise being up-converted to f0.  With the
+command-line option --broken, the incorrect implementation of flicker noise,
+found in broken.va, is used instead. Here the absolute value causes loss of the
+sign of the modulation and you get the incorrect results where the flicker noise
+is upconverted to 2*f0 and its harmonics. This is shown in Fig. 2 in the above
+paper.
 
 Simulation Parameters:
-    f0 (fₒ)= 2**17 "Hz"             # frequency of the sinusoid
-    ptsPerCycle = 64                # number of desired point per cycle
+    f0 (fₒ) = 2**17 "Hz"            # frequency of the modulating sinusoid
+    ampl = 100mV                    # amplitude of the modulating sinusoid
+    ptsPerCycle = 64                # number of desired points per cycle
     cycles = 2048*16                # total number of cycles
     T = 1.0/f0 "s"                  # period of one cycle
     dt = T/ptsPerCycle "s"          # (desired) time between transient simulation samples
@@ -40,7 +42,6 @@ Simulation Parameters:
     fmax = f0*ptsPerCycle/2.0 "Hz"  # maximum frequency for analysis
     ptsPerDec = 2000                # number of frequency points per decade
                                     # for the noise analysis
-    ampl = 100mV                    # amplitude of the sinusoid
 """
 
 # Imports {{{1

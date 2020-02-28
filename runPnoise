@@ -96,7 +96,7 @@ with Quantity.prefs(prec='full', spacer='', unity_sf='_'):
 
         ahdl_include "{model_file!s}"
 
-        model rref resistor kf=1.0e-6 af=2 // to match res_va
+        model rref resistor kf=1.0e-6 af=2  // to match res_va
 
         Vin    (n 0) vsource type=sine dc=1.0 sinedc=0.0 ampl={ampl} freq={f0}
         R1     (n 0) res_va

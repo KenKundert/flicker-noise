@@ -43,6 +43,11 @@ Simulation Parameters:
     ptsPerDec = 2000                # number of frequency points per decade
                                     # for the noise analysis
 """
+# These simulation parameters are unusual because simulations involving 
+# transient noise were run during the course of writing the paper, and the 
+# values used in both the PNoise and transient noise simulations were chosen to 
+# be consistent.  Many of the values defined above are not needed with a simple 
+# PNoise analysis, and their values need not be so carefully chosen.
 
 # Imports {{{1
 from docopt import docopt

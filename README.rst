@@ -12,14 +12,24 @@ Transactions on Computer-Aided Design of Integrated Circuits and
 Systems some time in 2020.
 
 Also included are two circuits. The first is a simple test circuit for the 
-resistor model. The second is a circuit that tests the implementation of flicker 
-noise in the built-in BSIM4 model.
+resistor model.  Here R1 is the Verilog-A model and R2 is the resistor model 
+that is built-in to Spectre.
+
+.. image:: figures/pnoise.svg
+    :width: 600px
+
+The second is a circuit that tests the implementation of flicker noise in the 
+built-in BSIM4 model.
+
+.. image:: figures/pnbsim.svg
+    :width: 600px
 
 If you have a recent version of Spectre, you can simulate the circuits directly 
 and view the results in your favorite waveform viewer.
 
 If you have Python 3.6 or later, you can also run the simulation scripts, which
-re-generate the netlists, run the simulation (in Spectre), and plot the results.
+re-generate the netlists, run the simulations (in Spectre), and plot the 
+results.
 
 To install the script dependencies, from the directory that contains setup.py,
 run::

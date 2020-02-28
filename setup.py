@@ -6,16 +6,25 @@
 
 from setuptools import setup
 
-dependencies = 'docopt matplotlib numpy inform quantiphy>=2.9 psf-utils>=0.3 shlib'
+dependencies = """
+    docopt
+    matplotlib
+    numpy
+    inform
+    quantiphy>=2.9
+    psf-utils>=0.3
+    shlib
+    svg_schematic
+"""
 
 setup(
-    name='flicker-noise',
-    description='runs flicker noise simulations',
+    name="flicker-noise",
+    description="runs flicker noise simulations",
     author="Geoffrey Coram, Colin McAndrew, Kiran Gullapalli and Ken Kundert",
-    author_email='ken@designers-guide.com',
-    version = '1.0.1',
-    license='GPLv3+',
-    #script='runPnoise runBSIM'.split(),
+    author_email="ken@designers-guide.com",
+    version="1.0.1",
+    license="GPLv3+",
+    # script='runPnoise runBSIM'.split(),
     install_requires=dependencies.split(),
-    python_requires='>=3.6',
+    python_requires=">=3.6",
 )

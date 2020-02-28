@@ -43,40 +43,42 @@ Simulation Parameters:
     ptsPerDec = 2000                # number of frequency points per decade
                                     # for the noise analysis
 """
-# These simulation parameters are unusual because simulations involving 
-# transient noise were run during the course of writing the paper, and the 
-# values used in both the PNoise and transient noise simulations were chosen to 
-# be consistent.  Many of the values defined above are not needed with a simple 
+# These simulation parameters are unusual because simulations involving
+# transient noise were run during the course of writing the paper, and the
+# values used in both the PNoise and transient noise simulations were chosen to
+# be consistent.  Many of the values defined above are not needed with a simple
 # PNoise analysis, and their values need not be so carefully chosen.
 
 # Imports {{{1
-from docopt import docopt
-from inform import Inform, Error, comment, display, fatal, os_error, done
-import matplotlib.pyplot as plt
-from matplotlib.ticker import FuncFormatter
-from quantiphy import Quantity
-from psf_utils import PSF
-from shlib import Run, to_path, render_command, set_prefs as shlib_set_prefs
-from textwrap import dedent
 import re
+from textwrap import dedent
+import matplotlib.pyplot as plt
+from docopt import docopt
+from matplotlib.ticker import FuncFormatter
+from psf_utils import PSF
+from inform import Error, Inform, comment, display, done, fatal, os_error
+from quantiphy import Quantity
+from shlib import Run, render_command
+from shlib import set_prefs as shlib_set_prefs
+from shlib import to_path
 
 # Initialization {{{1
 cmdline = docopt(__doc__)
 
-broken = cmdline['--broken']
-Inform(verbose=cmdline['--verbose'], logfile=True, colorscheme=None)
+broken = cmdline["--broken"]
+Inform(verbose=cmdline["--verbose"], logfile=True, colorscheme=None)
 shlib_set_prefs(use_inform=True)
 
 # Globals {{{1
 # paths {{{2
-spectre_exe = "spectre"                         # Spectre executable
-working_model_file = to_path("resistor.va")     # working Verilog-A model file
-broken_model_file = to_path("broken.va")        # broken Verilog-A model file
-netlist_file = to_path("pnoise.scs")            # Spectre netlist file
-log_file = netlist_file.with_suffix('.log')     # Spectre logfile
-results_dir = netlist_file.with_suffix('.raw')  # simulation results directory
-psf_file = results_dir / 'pnoise.pnoise'        # PNoise PSF file
-sim_cmd = (spectre_exe, '=log', log_file, '-format', 'psfascii', netlist_file)
+spectre_exe = "spectre"  # Spectre executable
+working_model_file = to_path("resistor.va")  # working Verilog-A model file
+broken_model_file = to_path("broken.va")  # broken Verilog-A model file
+netlist_file = to_path("pnoise.scs")  # Spectre netlist file
+log_file = netlist_file.with_suffix(".log")  # Spectre logfile
+results_dir = netlist_file.with_suffix(".raw")  # simulation results directory
+psf_file = results_dir / "pnoise.pnoise"  # PNoise PSF file
+sim_cmd = (spectre_exe, "=log", log_file, "-format", "psfascii", netlist_file)
 
 # plotting preferences {{{2
 use_sci_notation = False  # alternative is to use SI scale factors
@@ -87,9 +89,10 @@ params = Quantity.extract(__doc__)
 globals().update(params)
 
 # netlist {{{2
-with Quantity.prefs(prec='full', spacer='', unity_sf='_'):
+with Quantity.prefs(prec="full", spacer="", unity_sf="_"):
     model_file = broken_model_file if broken else working_model_file
-    netlist = dedent(f"""
+    netlist = dedent(
+        f"""\
         // Resistor flicker noise simulations
 
         simulator lang=spectre
@@ -105,84 +108,83 @@ with Quantity.prefs(prec='full', spacer='', unity_sf='_'):
         noise  noise start={fmin} stop={fmax} dec={ptsPerDec} oprobe=Vin
         pss    pss fund={f0}
         pnoise pnoise start={fmin} stop={fmax} dec={ptsPerDec} maxsideband=10 oprobe=Vin
-    """)
-    netlist_file.write_text(netlist.lstrip())
+        """
+    )
+    netlist_file.write_text(netlist)
 
 # output parameters if verbose {{{2
-with Quantity.prefs(show_label = 'f', label_fmt_full = '{V:<18}  -- {d}'):
-    comment(f'Parameters:')
+with Quantity.prefs(show_label="f", label_fmt_full="{V:<18}  -- {d}"):
+    comment(f"Parameters:")
     for k, v in params.items():
-        comment(f'    {v:S}')
+        comment(f"    {v:S}")
 
 # simulate {{{1
 try:
-    comment('\nRunning:')
-    comment('   ', render_command(sim_cmd, {'=log': 1, '-format': 1}))
-    spectre = Run(sim_cmd, 'soEW0')
+    comment("\nRunning:")
+    comment("   ", render_command(sim_cmd, {"=log": 1, "-format": 1}))
+    spectre = Run(sim_cmd, "soEW0")
 except Error as e:
     if e.stdout:
         comment(e.stdout)
-    e.terminate(
-        culprit = spectre_exe,
-        codicil = f'See {log_file} for more information.'
-    )
+    e.terminate(culprit=spectre_exe, codicil=f"See {log_file} for more information.")
 
 # plot results {{{1
 # map noise units to simpler unicode representations
 unit_maps = [
-    (r'sqrt\(([^)]+)\)', r'√\1'),
-    (r'\^2', r'²'),
+    (r"sqrt\(([^)]+)\)", r"√\1"),
+    (r"\^2", r"²"),
 ]
+
+
 def fix_units(u):
     for s, r in unit_maps:
         u = re.sub(s, r, u)
     return u
 
+
 try:
     # Extract data from psf file
-    results = PSF(psf_file, sep=':')
+    results = PSF(psf_file, sep=":")
     sweep = results.get_sweep()
     x_name = sweep.name
     x_units = sweep.units
     x = sweep.abscissa
-    va_sig = results.get_signal('R1:total')
+    va_sig = results.get_signal("R1:total")
     y_units = fix_units(va_sig.units)
     y_va = va_sig.ordinate
-    ref_sig = results.get_signal('R2:total')
+    ref_sig = results.get_signal("R2:total")
     y_ref = ref_sig.ordinate
 
     # build axis formatters
-    x_axis_formatter = FuncFormatter(
-        lambda v, p: Quantity(v, x_units).render()
-    )
+    x_axis_formatter = FuncFormatter(lambda v, p: Quantity(v, x_units).render())
     if use_sci_notation:
         adjust_plot_bounds = dict(left=0.2, right=0.98)
         y_axis_formatter = FuncFormatter(
-            lambda v, p: Quantity(v, y_units).render(form='eng')
+            lambda v, p: Quantity(v, y_units).render(form="eng")
         )
     else:
         adjust_plot_bounds = dict(left=0.15, right=0.98)
         y_axis_formatter = FuncFormatter(
-            lambda v, p: Quantity(v, y_units).render(form='si')
+            lambda v, p: Quantity(v, y_units).render(form="si")
         )
 
     # create the pnoise plot
     figure, axes = plt.subplots(1, 1)
+    # need to shift the figure a bit to the right because of y-axis labels
     figure.subplots_adjust(**adjust_plot_bounds)
-        # need to shift the figure a bit to the right because of y-axis labels
-    axes.plot(x, y_va, linewidth=2, label='RESva')
-    axes.plot(x, y_ref, linewidth=2, label='RESref')
-    axes.legend(frameon=False, loc='best')
-    axes.set_xscale('log' if results.log_x(sweep) else 'linear')
-    axes.set_yscale('log' if results.log_y(sweep) else 'linear')
+    axes.plot(x, y_va, linewidth=2, label="RESva")
+    axes.plot(x, y_ref, linewidth=2, label="RESref")
+    axes.legend(frameon=False, loc="best")
+    axes.set_xscale("log" if results.log_x(sweep) else "linear")
+    axes.set_yscale("log" if results.log_y(sweep) else "linear")
     axes.xaxis.set_major_formatter(x_axis_formatter)
     axes.yaxis.set_major_formatter(y_axis_formatter)
-    plt.suptitle(f'Flicker Noise of Resistor with {f0} Sinusoidal Drive')
+    plt.suptitle(f"Flicker Noise of Resistor with {f0} Sinusoidal Drive")
     with Quantity.prefs(
-        prec = 2,
-        map_sf = Quantity.map_sf_to_sci_notation,
-        output_sf = 'YZEPTGMkmunpfazy',
-        minus = Quantity.minus_sign,
+        prec=2,
+        map_sf=Quantity.map_sf_to_sci_notation,
+        output_sf="YZEPTGMkmunpfazy",
+        minus=Quantity.minus_sign,
     ):
         plt.show()
 except Error as e:

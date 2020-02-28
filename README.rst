@@ -17,12 +17,14 @@ that is built-in to Spectre.
 
 .. image:: figures/pnoise.svg
     :width: 300px
+    :align: center
 
 The second is a circuit that tests the implementation of flicker noise in the 
 built-in BSIM4 model.
 
 .. image:: figures/pnbsim.svg
     :width: 300px
+    :align: center
 
 If you have a recent version of Spectre, you can simulate the circuits directly 
 and view the results in your favorite waveform viewer.
@@ -63,6 +65,7 @@ Resistor:
 
     .. image:: figures/resistor.svg
         :width: 600px
+        :align: center
 
 The above shows the flicker noise produced by Spectre's built-in resistor 
 (*RESref*) and the proposed Verilog-A model (*RESva*). In this case the flicker 
@@ -72,6 +75,7 @@ Broken Resistor:
 
     .. image:: figures/resistor-broken.svg
         :width: 600px
+        :align: center
 
 The above shows the flicker noise produced by Spectre's built-in resistor 
 (*RESref*) and the traditional Verilog-A model (*RESva*). In this case the 

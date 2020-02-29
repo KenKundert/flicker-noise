@@ -14,7 +14,7 @@ dependencies = """
     quantiphy>=2.9
     psf-utils>=0.3
     shlib
-    svg_schematic
+    svg_schematic>=0.6
 """
 
 setup(

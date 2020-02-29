@@ -23,7 +23,7 @@ The second is a circuit that tests the implementation of flicker noise in the
 built-in BSIM4 model.
 
 .. image:: figures/pnbsim.svg
-    :width: 250px
+    :width: 300px
     :align: center
 
 If you have a recent version of Spectre, you can simulate the circuits directly 

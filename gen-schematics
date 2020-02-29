@@ -15,7 +15,7 @@ with Schematic(filename="figures/pnoise.svg"):
     # Wire([r1.n, gnd.C])
     # Dot(r1.n)
 
-with Schematic(filename="figures/pnbsim.svg"):
+with Schematic(filename="figures/pnbsim.svg", right_pad=25):
     m = MOS((0,0), name="M", orientation='v')
     vs = Source(shift_y(m.s, 25), value="-A sin(2πf₀)", kind="sine")
     Wire([m.s, vs.p])

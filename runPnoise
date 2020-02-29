@@ -53,14 +53,13 @@ Simulation Parameters:
 import re
 from textwrap import dedent
 import matplotlib.pyplot as plt
-from docopt import docopt
 from matplotlib.ticker import FuncFormatter
-from psf_utils import PSF
+from numpy import sqrt
+from docopt import docopt
 from inform import Error, Inform, comment, display, done, fatal, os_error
+from psf_utils import PSF
 from quantiphy import Quantity
-from shlib import Run, render_command
-from shlib import set_prefs as shlib_set_prefs
-from shlib import to_path
+from shlib import Run, render_command, set_prefs as shlib_set_prefs, to_path
 
 # Initialization {{{1
 cmdline = docopt(__doc__)
@@ -82,6 +81,7 @@ sim_cmd = (spectre_exe, "=log", log_file, "-format", "psfascii", netlist_file)
 
 # plotting preferences {{{2
 use_sci_notation = False  # alternative is to use SI scale factors
+show_power = False        # display in V²/Hz if True and V/√Hz otherwise
 
 # simulation parameters {{{2
 # Extract the simulation parameters from description and add them as local vars
@@ -102,12 +102,12 @@ with Quantity.prefs(prec="full", spacer="", unity_sf="_"):
         model rref resistor kf=1.0e-6 af=2  // to match res_va
 
         Vmod   (n 0) vsource type=sine dc=1.0 sinedc=0.0 ampl={ampl} freq={f0}
-        R1     (n 0) res_va
-        R2     (n 0) rref r=100.0
+        Rva    (n 0) res_va
+        Rref   (n 0) rref r=100.0
 
-        noise  noise start={fmin} stop={fmax} dec={ptsPerDec} oprobe=Vin
-        pss    pss fund={f0}
-        pnoise pnoise start={fmin} stop={fmax} dec={ptsPerDec} maxsideband=10 oprobe=Vin
+        noise  noise start={fmin} stop={fmax} dec={ptsPerDec} oprobe=Vmod
+        pss    pss fund={f0} maxacfreq={fmax}
+        pnoise pnoise start={fmin} stop={fmax} dec={ptsPerDec} maxsideband=10 oprobe=Vmod
         """
     )
     netlist_file.write_text(netlist)
@@ -129,19 +129,6 @@ except Error as e:
     e.terminate(culprit=spectre_exe, codicil=f"See {log_file} for more information.")
 
 # plot results {{{1
-# map noise units to simpler unicode representations
-unit_maps = [
-    (r"sqrt\(([^)]+)\)", r"√\1"),
-    (r"\^2", r"²"),
-]
-
-
-def fix_units(u):
-    for s, r in unit_maps:
-        u = re.sub(s, r, u)
-    return u
-
-
 try:
     # Extract data from psf file
     results = PSF(psf_file, sep=":")
@@ -149,11 +136,16 @@ try:
     x_name = sweep.name
     x_units = sweep.units
     x = sweep.abscissa
-    va_sig = results.get_signal("R1:total")
-    y_units = fix_units(va_sig.units)
-    y_va = va_sig.ordinate
-    ref_sig = results.get_signal("R2:total")
-    y_ref = ref_sig.ordinate
+    va_sig = results.get_signal("Rva:total")
+    ref_sig = results.get_signal("Rref:total")
+    if show_power:
+        y_units = "V²/Hz"
+        y_va = va_sig.ordinate
+        y_ref = ref_sig.ordinate
+    else:
+        y_units = "V/√Hz"
+        y_va = sqrt(va_sig.ordinate)
+        y_ref = sqrt(ref_sig.ordinate)
 
     # build axis formatters
     x_axis_formatter = FuncFormatter(lambda v, p: Quantity(v, x_units).render())

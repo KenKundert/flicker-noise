@@ -30,8 +30,9 @@ ampl in this program.
 
 
 Simulation Parameters:
-    f0 (fₒ)= 2**17 "Hz"             # frequency of the sinusoid
-    ptsPerCycle = 64                # number of desired point per cycle
+    f0 (fₒ) = 2**17 "Hz"            # frequency of the modulating sinusoid
+    ampl = 100mV                    # amplitude of the modulating sinusoid
+    ptsPerCycle = 64                # number of desired points per cycle
     cycles = 2048*16                # total number of cycles
     T = 1.0/f0 "s"                  # period of one cycle
     dt = T/ptsPerCycle "s"          # (desired) time between transient simulation samples
@@ -40,42 +41,43 @@ Simulation Parameters:
     fmax = f0*ptsPerCycle/2.0 "Hz"  # maximum frequency for analysis
     ptsPerDec = 2000                # number of frequency points per decade
                                     # for the noise analysis
-    ampl = 100mV                    # amplitude of the sinusoid
 """
-# These simulation parameters are unusual because simulations involving 
-# transient noise were run during the course of writing the paper, and the 
-# values used in both the PNoise and transient noise simulations were chosen to 
-# be consistent.  Many of the values defined above are not needed with a simple 
+# These simulation parameters are unusual because simulations involving
+# transient noise were run during the course of writing the paper, and the
+# values used in both the PNoise and transient noise simulations were chosen to
+# be consistent.  Many of the values defined above are not needed with a simple
 # PNoise analysis, and their values need not be so carefully chosen.
 
 # Imports {{{1
-from docopt import docopt
-from inform import Inform, Error, comment, display, fatal, os_error, done
+import re
+from textwrap import dedent
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
-from quantiphy import Quantity
+from numpy import sqrt
+from docopt import docopt
+from inform import Error, Inform, comment, display, done, fatal, os_error
 from psf_utils import PSF
-from shlib import Run, to_path, render_command, set_prefs as shlib_set_prefs
-from textwrap import dedent
-import re
+from quantiphy import Quantity
+from shlib import Run, render_command, set_prefs as shlib_set_prefs, to_path
 
 # Initialization {{{1
 cmdline = docopt(__doc__)
 
-Inform(verbose=cmdline['--verbose'], logfile=True, colorscheme=None)
+Inform(verbose=cmdline["--verbose"], logfile=True, colorscheme=None)
 shlib_set_prefs(use_inform=True)
 
 # Globals {{{1
 # paths {{{2
 spectre_exe = "spectre"                         # Spectre executable
 netlist_file = to_path("pnbsim.scs")            # Spectre netlist file
-log_file = netlist_file.with_suffix('.log')     # Spectre logfile
-results_dir = netlist_file.with_suffix('.raw')  # simulation results directory
-psf_file = results_dir / 'pnoise.pnoise'        # PNoise PSF file
-sim_cmd = (spectre_exe, '=log', log_file, '-format', 'psfascii', netlist_file)
+log_file = netlist_file.with_suffix(".log")     # Spectre logfile
+results_dir = netlist_file.with_suffix(".raw")  # simulation results directory
+psf_file = results_dir / "pnoise.pnoise"        # PNoise PSF file
+sim_cmd = (spectre_exe, "=log", log_file, "-format", "psfascii", netlist_file)
 
 # plotting preferences {{{2
 use_sci_notation = False  # alternative is to use SI scale factors
+show_power = False        # display in V²/Hz if True and V/√Hz otherwise
 
 # simulation parameters {{{2
 # Extract the simulation parameters from description and add them as local vars
@@ -83,7 +85,7 @@ params = Quantity.extract(__doc__)
 globals().update(params)
 
 # netlist {{{2
-with Quantity.prefs(prec='full', spacer='', unity_sf='_'):
+with Quantity.prefs(prec="full", spacer="", unity_sf="_"):
     netlist = dedent(f"""
         // BSIM flicker noise simulations
 
@@ -113,80 +115,70 @@ with Quantity.prefs(prec='full', spacer='', unity_sf='_'):
     netlist_file.write_text(netlist.lstrip())
 
 # output parameters if verbose {{{2
-with Quantity.prefs(show_label = 'f', label_fmt_full = '{V:<18}  -- {d}'):
-    comment(f'Parameters:')
+with Quantity.prefs(show_label="f", label_fmt_full="{V:<18}  -- {d}"):
+    comment(f"Parameters:")
     for k, v in params.items():
-        comment(f'    {v:S}')
+        comment(f"    {v:S}")
 
 # simulate {{{1
 try:
-    comment('\nRunning:')
-    comment('   ', render_command(sim_cmd, {'=log': 1, '-format': 1}))
-    spectre = Run(sim_cmd, 'soEW0')
+    comment("\nRunning:")
+    comment("   ", render_command(sim_cmd, {"=log": 1, "-format": 1}))
+    spectre = Run(sim_cmd, "soEW0")
 except Error as e:
     if e.stdout:
         comment(e.stdout)
-    e.terminate(
-        culprit = spectre_exe,
-        codicil = f'See {log_file} for more information.'
-    )
+    e.terminate(culprit=spectre_exe, codicil=f"See {log_file} for more information.")
 
 # plot results {{{1
-# map noise units to simpler unicode representations
-unit_maps = [
-    (r'sqrt\(([^)]+)\)', r'√\1'),
-    (r'\^2', r'²'),
-]
-def fix_units(u):
-    for s, r in unit_maps:
-        u = re.sub(s, r, u)
-    return u
-
 try:
     # Extract data from psf file
-    results = PSF(psf_file, sep=':')
+    results = PSF(psf_file, sep=":")
     sweep = results.get_sweep()
     x_name = sweep.name
     x_units = sweep.units
     x = sweep.abscissa
-    f0_sig = results.get_signal('MBSIM4f0:fn')
-    y_units = fix_units(f0_sig.units)
-    y_f0 = f0_sig.ordinate
-    f1_sig = results.get_signal('MBSIM4f1:fn')
-    y_f1 = f1_sig.ordinate
+    f0_sig = results.get_signal("MBSIM4f0:fn")
+    f1_sig = results.get_signal("MBSIM4f1:fn")
+    if show_power:
+        y_units = "V²/Hz"
+        y_f0 = f0_sig.ordinate
+        y_f1 = f1_sig.ordinate
+    else:
+        y_units = "V/√Hz"
+        y_f0 = sqrt(f0_sig.ordinate)
+        y_f1 = sqrt(f1_sig.ordinate)
 
     # build axis formatters
-    x_axis_formatter = FuncFormatter(
-        lambda v, p: Quantity(v, x_units).render()
-    )
+    x_axis_formatter = FuncFormatter(lambda v, p: Quantity(v, x_units).render())
     if use_sci_notation:
         adjust_plot_bounds = dict(left=0.2, right=0.98)
         y_axis_formatter = FuncFormatter(
-            lambda v, p: Quantity(v, y_units).render(form='eng')
+            lambda v, p: Quantity(v, y_units).render(form="eng")
         )
     else:
         adjust_plot_bounds = dict(left=0.15, right=0.98)
         y_axis_formatter = FuncFormatter(
-            lambda v, p: Quantity(v, y_units).render(form='si')
+            lambda v, p: Quantity(v, y_units).render(form="si")
         )
 
     # create the pnoise plot
     figure, axes = plt.subplots(1, 1)
+    # need to shift the figure a bit to the right because of y-axis labels
     figure.subplots_adjust(**adjust_plot_bounds)
-        # need to shift the figure a bit to the right because of y-axis labels
-    axes.plot(x, y_f0, linewidth=2, label='fnoimod0')
-    axes.plot(x, y_f1, linewidth=2, label='fnoimod1')
-    axes.legend(frameon=False, loc='best')
-    axes.set_xscale('log' if results.log_x(sweep) else 'linear')
-    axes.set_yscale('log' if results.log_y(sweep) else 'linear')
+    axes.plot(x, y_f0, linewidth=2, label="fnoimod0")
+    axes.plot(x, y_f1, linewidth=2, label="fnoimod1")
+    axes.legend(frameon=False, loc="best")
+    axes.set_xscale("log" if results.log_x(sweep) else "linear")
+    axes.set_yscale("log" if results.log_y(sweep) else "linear")
     axes.xaxis.set_major_formatter(x_axis_formatter)
     axes.yaxis.set_major_formatter(y_axis_formatter)
-    plt.suptitle(f'Flicker Noise of BSIM4 Transistors with {f0} Sinusoidal Drive')
+    plt.suptitle(f"Flicker Noise of BSIM4 Transistors with {f0} Sinusoidal Drive")
     with Quantity.prefs(
-        prec = 2,
-        map_sf = Quantity.map_sf_to_sci_notation,
-        output_sf = 'YZEPTGMkmunpfazy',
-        minus = Quantity.minus_sign,
+        prec=2,
+        map_sf=Quantity.map_sf_to_sci_notation,
+        output_sf="YZEPTGMkmunpfazy",
+        minus=Quantity.minus_sign,
     ):
         plt.show()
 except Error as e:

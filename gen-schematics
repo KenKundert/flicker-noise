@@ -6,7 +6,7 @@ from svg_schematic import (
 )
 
 with Schematic(filename="figures/pnoise.svg"):
-    vmod = Source((0, 0), name="Vmod", value="A sin(2πf₀)", kind="sine")
+    vmod = Source((0, 0), name="Vmod", value="𝘈 sin(2π𝘧₀)", kind="sine")
     r1 = Resistor(shift_x(vmod.C, 125), name="R1", orientation="v")
     r2 = Resistor(shift_x(r1.C, 125), name="R2", orientation="v")
     Wire([vmod.p, r2.N])
@@ -17,14 +17,14 @@ with Schematic(filename="figures/pnoise.svg"):
 
 with Schematic(filename="figures/pnbsim.svg", right_pad=25):
     m = MOS((0,0), orientation='h-|')
-    vs = Source(shift(m.s, -25, 50), value="A sin(2πf₀)", kind="sine", 
+    vs = Source(shift(m.s, -25, 50), value="𝘈 sin(2π𝘧₀)", kind="sine", 
     orientation='v-')
     Wire([m.s, vs.n])
     Ground(vs.p)
     vg = Source(shift(m.g, -125, 50), value="3V", kind="vdc")
     Wire([m.g, vg.p])
     Ground(vg.n)
-    vd = Source(shift(m.d, 25, 50), value="A sin(2πf₀)", kind="sine", 
+    vd = Source(shift(m.d, 25, 50), value="𝘈 sin(2π𝘧₀)", kind="sine", 
     orientation='v')
     Wire([m.d, vd.p])
     Ground(vd.n)

@@ -16,13 +16,15 @@ with Schematic(filename="figures/pnoise.svg"):
     # Dot(r1.n)
 
 with Schematic(filename="figures/pnbsim.svg", right_pad=25):
-    m = MOS((0,0), name="M", orientation='v')
-    vs = Source(shift_y(m.s, 25), value="-A sin(2πf₀)", kind="sine")
-    Wire([m.s, vs.p])
-    Ground(vs.n)
-    vg = Source(shift_y(m.g, 50), value="3V", kind="vdc")
+    m = MOS((0,0), orientation='h-|')
+    vs = Source(shift(m.s, -25, 50), value="A sin(2πf₀)", kind="sine", 
+    orientation='v-')
+    Wire([m.s, vs.n])
+    Ground(vs.p)
+    vg = Source(shift(m.g, -125, 50), value="3V", kind="vdc")
     Wire([m.g, vg.p])
     Ground(vg.n)
-    vd = Source(shift(m.d, 50, 50), value="A sin(2πf₀)", kind="sine")
+    vd = Source(shift(m.d, 25, 50), value="A sin(2πf₀)", kind="sine", 
+    orientation='v')
     Wire([m.d, vd.p])
     Ground(vd.n)

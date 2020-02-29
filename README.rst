@@ -16,14 +16,14 @@ resistor model.  Here R1 is the Verilog-A model and R2 is the resistor model
 that is built-in to Spectre.
 
 .. image:: figures/pnoise.svg
-    :scale: 10%
+    :width: 300px
     :align: center
 
 The second is a circuit that tests the implementation of flicker noise in the 
 built-in BSIM4 model.
 
 .. image:: figures/pnbsim.svg
-    :scale: 10%
+    :width: 200px
     :align: center
 
 If you have a recent version of Spectre, you can simulate the circuits directly 

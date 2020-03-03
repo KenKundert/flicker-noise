@@ -22,7 +22,7 @@ setup(
     description="runs flicker noise simulations",
     author="Geoffrey Coram, Colin McAndrew, Kiran Gullapalli and Ken Kundert",
     author_email="ken@designers-guide.com",
-    version="1.0.1",
+    version="1.1.0",
     license="GPLv3+",
     # script='runPnoise runBSIM'.split(),
     install_requires=dependencies.split(),

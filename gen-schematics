@@ -1,28 +1,22 @@
 #!/usr/bin/env python3
 
-from svg_schematic import (
-    Dot, Ground, Label, MOS, Resistor, Schematic, Source, Wire,
-    shift, shift_x, shift_y,
-)
+from svg_schematic import Ground, Label, MOS, Resistor, Schematic, Source, Wire
 
 with Schematic(filename="figures/pnoise.svg"):
-    vmod = Source((0, 0), value="𝘈 sin(2π𝘧₀)", kind="sine")
-    r1 = Resistor(shift_x(vmod.C, 125), name="Rva", orientation="v")
-    r2 = Resistor(shift_x(r1.C, 125), name="Rref", orientation="v")
-    Wire([vmod.p, r2.N])
-    Wire([vmod.n, r2.S])
-    # gnd = Ground(shift_y(r1.n, 25))
-    # Wire([r1.n, gnd.C])
-    # Dot(r1.n)
+    vmod = Source(value="𝘈 sin(2π𝘧₀)", kind="sine")
+    r1 = Resistor(C=vmod.C, xoff=125, name="Rva", orient="v")
+    r2 = Resistor(C=r1.C, xoff=125, name="Rref", orient="v")
+    Wire([vmod.p, r2.p])
+    Wire([vmod.n, r2.n])
 
 with Schematic(filename="figures/pnbsim.svg", right_pad=25):
-    m = MOS((0,0), orientation='h-|')
-    vs = Source(shift(m.s, -25, 50), value="𝘈 sin(2π𝘧₀)", kind="sine", orientation='v-')
+    m = MOS(orient='h-|')
+    vs = Source(n=m.s, xoff=-25, value="𝘈 sin(2π𝘧₀)", kind="sine", orient='v-')
     Wire([m.s, vs.n])
-    Ground(vs.p)
-    vg = Source(shift(m.g, -125, 50), value="3V", kind="vdc")
+    Ground(C=vs.p)
+    vg = Source(p=m.g, xoff=-125, value="3V", kind="vdc")
     Wire([m.g, vg.p])
-    Ground(vg.n)
-    vd = Source(shift(m.d, 25, 50), value="𝘈 sin(2π𝘧₀)", kind="sine", orientation='v')
+    Ground(C=vg.n)
+    vd = Source(p=m.d, xoff=25, value="𝘈 sin(2π𝘧₀)", kind="sine", orient='v')
     Wire([m.d, vd.p])
-    Ground(vd.n)
+    Ground(C=vd.n)

@@ -5,9 +5,9 @@ simulator lang=spectre
 model nchbsim4_f0 bsim4      fnoimod=0 kf=1e-23 af=2
 model nchbsim4_f1 bsim4      fnoimod=1
 
-VX (x 0) vsource type=sine dc=1.0 sinedc=0.0 ampl=100mV freq=131.072kHz
-ED (d 0 x 0) vcvs gain=1
-ES (s 0 x 0) vcvs gain=-1
+Vmod (mod 0) vsource type=sine dc=1.0 sinedc=0.0 ampl=100mV freq=131.072kHz
+ED (d 0 mod 0) vcvs gain=1
+ES (s 0 mod 0) vcvs gain=-1
 VG (g 0) vsource dc=3
 VB (b 0) vsource dc=-0.2
 

@@ -12,7 +12,7 @@ Transactions on Computer-Aided Design of Integrated Circuits and
 Systems some time in 2020.
 
 Also included are two circuits. The first is a simple test circuit for the 
-resistor model.  Here R1 is the Verilog-A model and R2 is the resistor model 
+resistor model.  Here Rva is the Verilog-A model and Rref is the resistor model 
 that is built-in to Spectre.
 
 .. image:: figures/pnoise.svg

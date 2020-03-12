@@ -16,14 +16,14 @@ resistor model.  Here Rva is the Verilog-A model and Rref is the resistor model
 that is built-in to Spectre.
 
 .. image:: figures/pnoise.svg
-    :width: 25%
+    :width: 35%
     :align: center
 
 The second is a circuit that tests the implementation of flicker noise in the 
 built-in BSIM4 model.
 
 .. image:: figures/pnbsim.svg
-    :width: 25%
+    :width: 35%
     :align: center
 
 If you have a recent version of Spectre, you can simulate the circuits directly 

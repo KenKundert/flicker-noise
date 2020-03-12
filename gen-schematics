@@ -4,14 +4,14 @@ from svg_schematic import Ground, Label, MOS, Resistor, Schematic, Source, Wire
 from inform import Error, error, os_error
 
 try:
-    with Schematic(filename="figures/pnoise.svg"):
+    with Schematic(filename="figures/pnoise.svg", line_width=2):
         vmod = Source(value="𝘈 sin(2π𝘧₀)", kind="sine")
         r1 = Resistor(C=vmod.C, xoff=125, name="Rva", orient="v")
         r2 = Resistor(C=r1.C, xoff=125, name="Rref", orient="v")
         Wire([vmod.p, r2.p])
         Wire([vmod.n, r2.n])
 
-    with Schematic(filename="figures/pnbsim.svg", right_pad=25):
+    with Schematic(filename="figures/pnbsim.svg", right_pad=25, line_width=2):
         m = MOS(orient='h-|')
         vs = Source(n=m.s, xoff=-25, value="𝘈 sin(2π𝘧₀)", kind="sine", orient='v-')
         Wire([m.s, vs.n])

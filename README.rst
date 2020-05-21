@@ -112,3 +112,11 @@ The above shows two different flicker noise models implemented in the built-in
 BSIM4 model in Spectre.  *fnoimod=1* was implemented correctly while *fnoimod=0* 
 was not.
 
+A good first order model for flicker noise in MOSFETs is a bias independent 
+variation in the threshold voltage.  This variation tends to modulate the 
+current passing through the channel. If the channel current is DC you end up 
+with simple *1/f* noise. However, if the channel current is sinusoidal, the 
+flicker noise is up-converted to the frequency of the sinuosoid, as seen with 
+*fnoimod*=1.  However, the implementation of *fnoimod*=0 discards the sign of 
+the sinusoid when doing the noise calculation, and so we again see peaks at each 
+of the even harmonics of the test signal.

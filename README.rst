@@ -71,14 +71,14 @@ The above shows the flicker noise produced by Spectre's built-in resistor
 (*RESref*) and the proposed Verilog-A model (*RESva*). In this case the flicker 
 noise of the built-in resistor model was implemented correctly and both agree.
 
-Flicker noise in a resistor is a variation or flickering in the value of the 
+Flicker noise in a resistor is a variation or a flickering in the value of the 
 resistance over time. The variation has a *1/f* power spectrum and is completely 
 bias independent; it is not affected by the applied signal at all.  You can 
 observe the flickering by applying a bias voltage to the resistor.  The result 
-will be a noise in the current with a *1/f* spectrum.  In this circuit we apply 
-a sinusoidal voltage with a frequency of 131kHz and no DC component to observe 
-the flickering.  This results in the same *1/f* characteristic in the noise, but 
-now centered at 131kHz.
+will be a noise in the current with a *1/f* spectrum.  In this circuit we 
+instead apply a sinusoidal voltage with a frequency of 131kHz and no DC 
+component to observe the flickering.  This results in the same *1/f* 
+characteristic in the noise, but now centered at 131kHz as shown in the figure.
 
 Broken Resistor:
 
@@ -96,11 +96,11 @@ noise calculation. As such, it appears to the resistor that the applied test
 signal is not a pure tone sinusoid, but rather a fully rectified sinusoid. So 
 rather than have a single spectral component at 131kHz, it has components at 
 each of the even harmonics of 131kHz, meaning it has components at DC, and 
-262kHz, 524kHz, etc.  The result is that the *1/f* noise from the resistor is 
-replicated and shifted up by each harmonic, meaning that there are peaks at each 
-of the harmonics of the rectified sine wave.  The peaks are equally spaced in 
-frequency, but they appear to be getting closer together at higher frequencies 
-because this is a log-log plot.
+262kHz, 524kHz, etc.  The result is that the *1/f* spectrum from the flicker 
+noise is replicated and shifted up by each harmonic, meaning that there are 
+peaks at each of the harmonics of the rectified sine wave.  The peaks are 
+equally spaced in frequency, but they appear to be getting closer together at 
+higher frequencies because the *x*-axis uses logarithmic scaling.
 
 
 BSIM:

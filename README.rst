@@ -78,7 +78,7 @@ observe the flickering by applying a DC bias voltage to the resistor.  The
 result will be a noise in the current with a *1/f* spectrum.  In this circuit we 
 instead apply a sinusoidal voltage with a frequency of 131kHz and no DC 
 component to observe the flickering.  This results in the same *1/f* 
-characteristic in the noise, but now centered at 131kHz as shown in the figure.
+characteristic in the noise, but now mixed up to 131kHz as shown in the figure.
 
 Broken Resistor:
 

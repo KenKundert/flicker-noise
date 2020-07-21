@@ -67,6 +67,10 @@ Inform(verbose=cmdline["--verbose"], logfile=True, colorscheme=None)
 shlib_set_prefs(use_inform=True)
 
 # Globals {{{1
+# plotting preferences {{{2
+use_sci_notation = False  # alternative is to use SI scale factors
+show_power = False        # display in V²/Hz if True and V/√Hz otherwise
+
 # paths {{{2
 spectre_exe = "spectre"                         # Spectre executable
 netlist_file = to_path("pnbsim.scs")            # Spectre netlist file
@@ -75,16 +79,12 @@ results_dir = netlist_file.with_suffix(".raw")  # simulation results directory
 psf_file = results_dir / "pnoise.pnoise"        # PNoise PSF file
 sim_cmd = (spectre_exe, "=log", log_file, "-format", "psfascii", netlist_file)
 
-# plotting preferences {{{2
-use_sci_notation = False  # alternative is to use SI scale factors
-show_power = False        # display in V²/Hz if True and V/√Hz otherwise
-
 # simulation parameters {{{2
 # Extract the simulation parameters from description and add them as local vars
 params = Quantity.extract(__doc__)
 globals().update(params)
 
-# netlist {{{2
+# generate netlist {{{2
 with Quantity.prefs(prec="full", spacer="", unity_sf="_"):
     netlist = dedent(f"""
         // BSIM flicker noise simulations

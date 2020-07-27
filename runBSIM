@@ -65,6 +65,7 @@ cmdline = docopt(__doc__)
 
 Inform(verbose=cmdline["--verbose"], logfile=True, colorscheme=None)
 shlib_set_prefs(use_inform=True)
+Quantity.set_prefs(map_sf=Quantity.map_sf_to_greek)
 
 # Globals {{{1
 # plotting preferences {{{2
@@ -85,7 +86,7 @@ params = Quantity.extract(__doc__)
 globals().update(params)
 
 # generate netlist {{{2
-with Quantity.prefs(prec="full", spacer="", unity_sf="_"):
+with Quantity.prefs(prec="full", form='sia', spacer="", unity_sf="_"):
     netlist = dedent(f"""
         // BSIM flicker noise simulations
 

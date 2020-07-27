@@ -11,7 +11,7 @@ dependencies = """
     matplotlib
     numpy
     inform
-    quantiphy>=2.9
+    quantiphy>=2.12
     psf-utils>=0.3
     shlib
     svg_schematic>=0.7

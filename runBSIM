@@ -38,7 +38,7 @@ Simulation Parameters:
     dt = T/ptsPerCycle "s"          # (desired) time between transient simulation samples
     tstop = T*cycles "s"            # stop time for transient simulation
     fmin = 1.0*int(1.0/tstop) "Hz"  # minimum frequency for analysis
-    fmax = f0*ptsPerCycle/2.0 "Hz"  # maximum frequency for analysis
+    fmax = f0*ptsPerCycle/2 "Hz"    # maximum frequency for analysis
     ptsPerDec = 2000                # number of frequency points per decade
                                     # for the noise analysis
 """
@@ -125,7 +125,7 @@ with Quantity.prefs(show_label="f", label_fmt_full="{V:<18}  -- {d}"):
 try:
     comment("\nRunning:")
     comment("   ", render_command(sim_cmd, {"=log": 1, "-format": 1}))
-    spectre = Run(sim_cmd, "soEW0")
+    spectre = Run(sim_cmd, "sOEW0")
 except Error as e:
     if e.stdout:
         comment(e.stdout)

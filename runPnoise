@@ -174,10 +174,10 @@ try:
     axes.yaxis.set_major_formatter(y_axis_formatter)
     plt.suptitle(f"Flicker Noise of Resistor with {f0} Sinusoidal Drive")
     with Quantity.prefs(
-        prec=2,
-        map_sf=Quantity.map_sf_to_sci_notation,
-        output_sf="YZEPTGMkmunpfazy",
-        minus=Quantity.minus_sign,
+        prec = 2,
+        map_sf = Quantity.map_sf_to_sci_notation,
+        output_sf = "YZEPTGMkmunpfazy",
+        minus = Quantity.minus_sign,
     ):
         plt.show()
 except Error as e:

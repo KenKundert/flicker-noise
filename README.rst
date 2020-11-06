@@ -63,9 +63,9 @@ My rather old version of Spectre (15.1.0) generated the following results:
 
 Resistor:
 
-    .. image:: figures/resistor.svg
-        :width: 600px
-        :align: center
+.. image:: figures/resistor.svg
+    :width: 600px
+    :align: center
 
 The above shows the flicker noise produced by Spectre's built-in resistor 
 (*RESref*) and the proposed Verilog-A model (*RESva*). In this case the flicker 
@@ -82,9 +82,9 @@ characteristic in the noise, but now mixed up to 131kHz as shown in the figure.
 
 Broken Resistor:
 
-    .. image:: figures/resistor-broken.svg
-        :width: 600px
-        :align: center
+.. image:: figures/resistor-broken.svg
+    :width: 600px
+    :align: center
 
 The above shows the flicker noise produced by Spectre's built-in resistor 
 (*RESref*) and the traditional Verilog-A model (*RESva*). In this case the 
@@ -105,8 +105,8 @@ higher frequencies because the *x*-axis uses logarithmic scaling.
 
 BSIM:
 
-    .. image:: figures/bsim.svg
-        :width: 600px
+.. image:: figures/bsim.svg
+    :width: 600px
 
 The above shows two different flicker noise models implemented in the built-in 
 BSIM4 model in Spectre.  *fnoimod=1* was implemented correctly while *fnoimod=0* 

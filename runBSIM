@@ -69,8 +69,12 @@ Quantity.set_prefs(map_sf=Quantity.map_sf_to_greek)
 
 # Globals {{{1
 # plotting preferences {{{2
-use_sci_notation = False  # alternative is to use SI scale factors
+use_sci_notation = False  # axis labels (alternative is to use SI scale factors)
 show_power = False        # display in V²/Hz if True and V/√Hz otherwise
+if use_sci_notation:
+    adjust_plot_bounds = dict(left=0.2, right=0.98)
+else:
+    adjust_plot_bounds = dict(left=0.15, right=0.98)
 
 # paths {{{2
 spectre_exe = "spectre"                         # Spectre executable
@@ -133,7 +137,7 @@ except Error as e:
 
 # plot results {{{1
 try:
-    # Extract data from psf file
+    # Extract data from PSF file
     results = PSF(psf_file, sep=":")
     sweep = results.get_sweep()
     x_name = sweep.name
@@ -151,19 +155,17 @@ try:
         y_f1 = sqrt(f1_sig.ordinate)
 
     # build axis formatters
-    x_axis_formatter = FuncFormatter(lambda v, p: Quantity(v, x_units).render())
-    if use_sci_notation:
-        adjust_plot_bounds = dict(left=0.2, right=0.98)
-        y_axis_formatter = FuncFormatter(
-            lambda v, p: Quantity(v, y_units).render(form="eng")
-        )
-    else:
-        adjust_plot_bounds = dict(left=0.15, right=0.98)
-        y_axis_formatter = FuncFormatter(
-            lambda v, p: Quantity(v, y_units).render(form="si")
-        )
+    form = "eng" if use_sci_notation else "si"
+    def format_x_axis_label(value, _):
+        return Quantity(value, x_units).render(form=form)
 
-    # create the pnoise plot
+    def format_y_axis_label(value, _):
+        return Quantity(value, y_units).render(form=form)
+
+    x_axis_formatter = FuncFormatter(format_x_axis_label)
+    y_axis_formatter = FuncFormatter(format_y_axis_label)
+
+    # create the PNoise graph
     figure, axes = plt.subplots(1, 1)
     # need to shift the figure a bit to the right because of y-axis labels
     figure.subplots_adjust(**adjust_plot_bounds)
@@ -176,10 +178,10 @@ try:
     axes.yaxis.set_major_formatter(y_axis_formatter)
     plt.suptitle(f"Flicker Noise of BSIM4 Transistors with {f0} Sinusoidal Drive")
     with Quantity.prefs(
-        prec=2,
-        map_sf=Quantity.map_sf_to_sci_notation,
-        output_sf="YZEPTGMkmunpfazy",
-        minus=Quantity.minus_sign,
+        prec = 2,
+        map_sf = Quantity.map_sf_to_sci_notation,
+        output_sf = "YZEPTGMkmunpfazy",
+        minus = Quantity.minus_sign,
     ):
         plt.show()
 except Error as e:

@@ -167,7 +167,7 @@ try:
 
     # create the PNoise graph
     figure, axes = plt.subplots(1, 1)
-    # need to shift the figure a bit to the right because of y-axis labels
+    # shift the figure a bit to the right to accommodate y-axis labels
     figure.subplots_adjust(**adjust_plot_bounds)
     axes.plot(x, y_f0, linewidth=2, label="fnoimod0")
     axes.plot(x, y_f1, linewidth=2, label="fnoimod1")

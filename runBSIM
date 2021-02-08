@@ -23,7 +23,7 @@ expect only different amplitudes.
 
 The simulation results were reported in the paper "Flicker Noise Formulations
 in Verilog-A Compact Models" by G. J. Coram, C. C. McAndrew, K. K. Gullapalli,
-and K. S. Kundert. It has been submitted for publication in IEEE Trans. CAD.
+and K. S. Kundert; IEEE Transactions on CAD, vol. 39, no. 10, October 2020.
 
 The frequency and amplitude of the excitation are set by the variables f0 and
 ampl in this program.

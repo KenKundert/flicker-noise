@@ -20,7 +20,7 @@ The model "res_va" in the resistor.va file is used, as is the built-in spectre
 resistor model.  The simulation results were reported in the paper "Flicker 
 Noise Formulations in Verilog-A Compact Models" by G. J. Coram, C. C. McAndrew, 
 K. K. Gullapalli, and K. S. Kundert; IEEE Transactions on CAD, vol. 39, no. 10, 
-   October 2020.
+October 2020.
 
 The file resistor.va preserves the sign of the modulation.  The simulation
 results are correct with the flicker noise being up-converted to f0.  With the

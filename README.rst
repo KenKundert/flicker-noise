@@ -107,9 +107,9 @@ built-in resistor and the broken version of the Verilog-A resistor are driven
 with a 1Vp sinusoid where the DC offset is swept from 1V to –1V. In the first 
 and last graphs, the offset is 1V and –1V, so the current through the resistors 
 never change sign.  They are either always positive or always negative. In these 
-cases, discarding of the sign is of no consequence and the noise computed 
-for the two resistors agree.  There is a peak at *f*=0 because of the DC 
-component of the modulation signal, and a peak at *f*=*f₀*, which is the drive 
+cases, discarding of the sign is of no consequence and the noise computed for 
+the two resistors agree.  There is a peak at *f* = 0 because of the DC component 
+of the modulation signal, and a peak at *f* = *f₀*, which is the drive 
 frequency.  In the results for the 0 V offset, the built-in resistor only shows 
 a peak at *f₀*, the drive frequency, whereas the broken resistor shows peaks at 
 each of the even harmonics of the drive signal because the sign of the drive 

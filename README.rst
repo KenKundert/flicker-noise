@@ -102,6 +102,23 @@ peaks at each of the harmonics of the rectified sine wave.  The peaks are
 equally spaced in frequency, but they appear to be getting closer together at 
 higher frequencies because the *x*-axis uses logarithmic scaling.
 
+This problem is further illustrated in the graphs below. In this case both the 
+built-in resistor and the broken version of the Verilog-A resistor are driven 
+with a 1Vp sinusoid where the DC offset is swept from 1V to –1V. In the first 
+and last graphs, the offset is 1V and –1V, so the current through the resistors 
+never change sign.  They are either always positive or always negative. In these 
+cases, discarding of the sign is of no consequence and the noise computed 
+for the two resistors agree.  There is a peak at *f*=0 because of the DC 
+component of the modulation signal, and a peak at *f*=*f₀*, which is the drive 
+frequency.  In the results for the 0 V offset, the built-in resistor only shows 
+a peak at *f₀*, the drive frequency, whereas the broken resistor shows peaks at 
+each of the even harmonics of the drive signal because the sign of the drive 
+signal is lost.
+
+.. image:: figures/noise-vs-bias.svg
+    :width: 600px
+    :align: center
+
 
 BSIM:
 
@@ -117,6 +134,6 @@ variation in the threshold voltage.  This variation tends to modulate the
 current passing through the channel. If the channel current is DC you end up 
 with simple *1/f* noise. However, if the channel current is sinusoidal, the 
 flicker noise is up-converted to the frequency of the sinuosoid, as seen with 
-*fnoimod*=1.  However, the implementation of *fnoimod*=0 discards the sign of 
-the sinusoid when doing the noise calculation, and so we again see peaks at each 
-of the even harmonics of the test signal.
+*fnoimod* = 1.  However, the implementation of *fnoimod* = 0 discards the sign 
+of the sinusoid when doing the noise calculation, and so we again see peaks at 
+each of the even harmonics of the test signal.

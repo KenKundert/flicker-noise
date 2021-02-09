@@ -1,0 +1,219 @@
+#!/usr/bin/env python3
+# Description {{{1
+"""
+Simulate Resistor Flicker Noise with PNoise Analysis
+
+Usage:
+    runPnoise [options]
+
+Options:
+    -b, --broken              use the broken version of the model
+    -s <file>, --svg <file>   produce plot as SVG file rather than display it
+    -v, --verbose             turn on verbose mode
+
+Run a PNoise simulation on Verilog-A and built-in resistor models exhibiting
+flicker noise driven by a sinusoidal excitation.
+
+The frequency and amplitude of the excitation are set by the variables f0 and
+ampl in this program.
+
+The model "res_va" in the resistor.va file is used, as is the built-in spectre
+resistor model. The simulation results match those in the paper "Flicker Noise
+Formulations in Verilog-A Compact Models" by G. J. Coram, C. C. McAndrew, K. K.
+Gullapalli, and K. S. Kundert. It has been accepted for publication in IEEE
+Trans. CAD some time in 2020.
+
+The file resistor.va preserves the sign of the modulation.  The simulation
+results are correct with the flicker noise being up-converted to f0.  With the
+command-line option --broken, the incorrect implementation of flicker noise,
+found in broken.va, is used instead. Here the absolute value causes loss of the
+sign of the modulation and you get the incorrect results where the flicker noise
+is upconverted to 2*f0 and its harmonics. This is shown in Fig. 2 in the above
+paper.
+
+Simulation Parameters:
+    f0 (fₒ) = 2**17 "Hz"            # frequency of the modulating sinusoid
+    ampl = 100mV                    # amplitude of the modulating sinusoid
+    ptsPerCycle = 64                # number of desired points per cycle
+    cycles = 2048*16                # total number of cycles
+    T = 1.0/f0 "s"                  # period of one cycle
+    dt = T/ptsPerCycle "s"          # (desired) time between transient simulation samples
+    tstop = T*cycles "s"            # stop time for transient simulation
+    fmin = 1.0*int(1.0/tstop) "Hz"  # minimum frequency for analysis
+    fmax = f0*ptsPerCycle/2 "Hz"    # maximum frequency for analysis
+    ptsPerDec = 2000                # number of frequency points per decade
+                                    # for the noise analysis
+"""
+# These simulation parameters are unusual because simulations involving
+# transient noise were run during the course of writing the paper, and the
+# values used in both the PNoise and transient noise simulations were chosen to
+# be consistent.  Many of the values defined above are not needed with a simple
+# PNoise analysis, and their values need not be so carefully chosen.
+
+# Imports {{{1
+import re
+from textwrap import dedent
+import matplotlib
+import matplotlib.pyplot as plt
+from matplotlib.ticker import FuncFormatter
+from numpy import sqrt
+from docopt import docopt
+from inform import Error, Inform, comment, display, done, fatal, os_error
+from psf_utils import PSF
+from quantiphy import Quantity
+from rkm_codes import from_rkm
+from shlib import Run, render_command, set_prefs as shlib_set_prefs, to_path
+
+# Initialization {{{1
+cmdline = docopt(__doc__)
+
+broken = cmdline["--broken"]
+svg_file = cmdline['--svg']
+Inform(verbose=cmdline["--verbose"], logfile=True, colorscheme=None)
+shlib_set_prefs(use_inform=True)
+Quantity.set_prefs(map_sf=Quantity.map_sf_to_greek, minus=Quantity.minus_sign)
+
+# Globals {{{1
+# plotting preferences {{{2
+use_sci_notation = False  # axis labels (alternative is to use SI scale factors)
+show_power = False        # display in V²/Hz if True and V/√Hz otherwise
+if use_sci_notation:
+    adjust_plot_bounds = dict(left=0.2, right=0.98)
+else:
+    adjust_plot_bounds = dict(left=0.15, right=0.98)
+
+# paths {{{2
+spectre_exe = "spectre"                         # Spectre executable
+working_model_file = to_path("resistor.va")     # working Verilog-A model file
+broken_model_file = to_path("broken.va")        # broken Verilog-A model file
+netlist_file = to_path("pnoise.scs")            # Spectre netlist file
+log_file = netlist_file.with_suffix(".log")     # Spectre logfile
+results_dir = netlist_file.with_suffix(".raw")  # simulation results directory
+psf_file_prefix = "pnoise.pnoise"               # PNoise PSF file base name
+sim_cmd = (spectre_exe, "=log", log_file, "-format", "psfascii", netlist_file)
+
+# simulation parameters {{{2
+# Extract the simulation parameters from description and add them as local vars
+params = Quantity.extract(__doc__)
+globals().update(params)
+
+# generate netlist {{{2
+with Quantity.prefs(prec="full", form='sia', spacer="", unity_sf="_"):
+    model_file = broken_model_file if broken else working_model_file
+    netlist = dedent(
+        f"""\
+        // Resistor flicker noise simulations
+
+        simulator lang=spectre
+
+        ahdl_include "{model_file!s}"
+
+        model rref resistor kf=1.0e-6 af=2  // to match res_va
+
+        Vmod   (n 0) vsource type=sine dc=0 sinedc=0.0 ampl=1 freq={f0}
+        Rva    (n 0) res_va
+        Rref   (n 0) rref r=100.0
+
+        setVdc_1v0  alter dev=Vmod param="sinedc" value=1.001
+        pss_1v0     pss fund={f0} maxacfreq={fmax}
+        pnoise_1v0  pnoise start={fmin} stop={fmax} dec={ptsPerDec} maxsideband=10 oprobe=Vmod
+
+        setVdc_0v5  alter dev=Vmod param="sinedc" value=0.5
+        pss_0v5     pss fund={f0} maxacfreq={fmax}
+        pnoise_0v5  pnoise start={fmin} stop={fmax} dec={ptsPerDec} maxsideband=10 oprobe=Vmod
+
+        setVdc_0v0  alter dev=Vmod param="sinedc" value=0
+        pss_0v0     pss fund={f0} maxacfreq={fmax}
+        pnoise_0v0  pnoise start={fmin} stop={fmax} dec={ptsPerDec} maxsideband=10 oprobe=Vmod
+
+        setVdc_n0v5 alter dev=Vmod param="sinedc" value=-0.5
+        pss_n0v5   pss fund={f0} maxacfreq={fmax}
+        pnoise_n0v5 pnoise start={fmin} stop={fmax} dec={ptsPerDec} maxsideband=10 oprobe=Vmod
+
+        setVdc_n1v0 alter dev=Vmod param="sinedc" value=-1.001
+        pss_n1v0    pss fund={f0} maxacfreq={fmax}
+        pnoise_n1v0 pnoise start={fmin} stop={fmax} dec={ptsPerDec} maxsideband=10 oprobe=Vmod
+        """
+    )
+    netlist_file.write_text(netlist)
+
+# output parameters if verbose {{{2
+with Quantity.prefs(show_label="f", label_fmt_full="{V:<18}  -- {d}"):
+    comment(f"Parameters:")
+    for k, v in params.items():
+        comment(f"    {v:S}")
+
+# simulate {{{1
+try:
+    comment("\nRunning:")
+    comment("   ", render_command(sim_cmd, {"=log": 1, "-format": 1}))
+    spectre = Run(sim_cmd, "sOEW0")
+except Error as e:
+    if e.stdout:
+        comment(e.stdout)
+    e.terminate(culprit=spectre_exe, codicil=f"See {log_file} for more information.")
+
+# plot results {{{1
+try:
+    # create the PNoise graph
+    if svg_file:
+        matplotlib.use('SVG')
+    figure, all_axes = plt.subplots(5, 1, figsize=(8, 16))
+    figure.subplots_adjust(top=0.97, bottom=0.03, hspace=0.5, **adjust_plot_bounds)
+        # shift the figure a bit to the right to accommodate y-axis labels
+
+    for i, name in enumerate('1v0 0v5 0v0 n0v5 n1v0'.split()):
+
+        # Extract data from PSF file
+        psf_file = results_dir / f"pnoise_{name}.pnoise"
+        results = PSF(psf_file, sep=":")
+        sweep = results.get_sweep()
+        x_name = sweep.name
+        x_units = sweep.units
+        x = sweep.abscissa
+        va_sig = results.get_signal("Rva:total")
+        ref_sig = results.get_signal("Rref:total")
+        if show_power:
+            y_units = "V²/Hz"
+            y_va = va_sig.ordinate
+            y_ref = ref_sig.ordinate
+        else:
+            y_units = "V/√Hz"
+            y_va = sqrt(va_sig.ordinate)
+            y_ref = sqrt(ref_sig.ordinate)
+
+        # build axis formatters
+        form = "eng" if use_sci_notation else "si"
+        def format_x_axis_label(value, _):
+            return Quantity(value, x_units).render(form=form)
+
+        def format_y_axis_label(value, _):
+            return Quantity(value, y_units).render(form=form)
+
+        x_axis_formatter = FuncFormatter(format_x_axis_label)
+        y_axis_formatter = FuncFormatter(format_y_axis_label)
+
+        # build the sub-graph
+        axes = all_axes[i]
+        axes.plot(x, y_va, linewidth=2, label="RESva")
+        axes.plot(x, y_ref, linewidth=2, label="RESref")
+        axes.legend(frameon=False, loc="best")
+        axes.set_xscale("log" if results.log_x(sweep) else "linear")
+        axes.set_yscale("log" if results.log_y(sweep) else "linear")
+        axes.xaxis.set_major_formatter(x_axis_formatter)
+        axes.yaxis.set_major_formatter(y_axis_formatter)
+        axes.set_title(f"DC level = {from_rkm(name)}", pad=-225)
+    #plt.suptitle(f"Flicker Noise of Resistor with {f0} Sinusoidal Drive")
+    with Quantity.prefs(
+        prec = 2,
+        map_sf = Quantity.map_sf_to_sci_notation,
+        output_sf = "YZEPTGMkmunpfazy",
+    ):
+        if svg_file:
+            plt.savefig(svg_file)
+        else:
+            plt.show()
+except Error as e:
+    e.terminate()
+except KeyboardInterrupt as e:
+    done()

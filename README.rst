@@ -61,7 +61,9 @@ You can view the signal and waveforms with::
 
 My rather old version of Spectre (15.1.0) generated the following results:
 
-Resistor:
+
+Resistor
+--------
 
 .. image:: figures/resistor.svg
     :width: 600px
@@ -80,7 +82,9 @@ instead apply a sinusoidal voltage with a frequency of 131kHz and no DC
 component to observe the flickering.  This results in the same *1/f* 
 characteristic in the noise, but now mixed up to 131kHz as shown in the figure.
 
-Broken Resistor:
+
+Broken Resistor
+---------------
 
 .. image:: figures/resistor-broken.svg
     :width: 600px
@@ -120,7 +124,8 @@ signal is lost.
     :align: center
 
 
-BSIM:
+BSIM
+----
 
 .. image:: figures/bsim.svg
     :width: 600px

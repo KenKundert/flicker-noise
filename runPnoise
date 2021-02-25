@@ -50,7 +50,6 @@ Simulation Parameters:
 # PNoise analysis, and their values need not be so carefully chosen.
 
 # Imports {{{1
-import re
 from textwrap import dedent
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
@@ -96,8 +95,7 @@ globals().update(params)
 # generate netlist {{{2
 with Quantity.prefs(prec="full", form='sia', spacer="", unity_sf="_"):
     model_file = broken_model_file if broken else working_model_file
-    netlist = dedent(
-        f"""\
+    netlist = dedent(f"""\
         // Resistor flicker noise simulations
 
         simulator lang=spectre
@@ -113,8 +111,7 @@ with Quantity.prefs(prec="full", form='sia', spacer="", unity_sf="_"):
         noise  noise start={fmin} stop={fmax} dec={ptsPerDec} oprobe=Vmod
         pss    pss fund={f0} maxacfreq={fmax}
         pnoise pnoise start={fmin} stop={fmax} dec={ptsPerDec} maxsideband=10 oprobe=Vmod
-        """
-    )
+    """)
     netlist_file.write_text(netlist)
 
 # output parameters if verbose {{{2

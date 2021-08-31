@@ -32,17 +32,17 @@ is upconverted to 2*f0 and its harmonics. This is shown in Fig. 2 in the above
 paper.
 
 Simulation Parameters:
-    f0 (fₒ) = 2**17 "Hz"            # frequency of the modulating sinusoid
-    ampl = 100mV                    # amplitude of the modulating sinusoid
-    ptsPerCycle = 64                # number of desired points per cycle
-    cycles = 2048*16                # total number of cycles
-    T = 1.0/f0 "s"                  # period of one cycle
-    dt = T/ptsPerCycle "s"          # (desired) time between transient simulation samples
-    tstop = T*cycles "s"            # stop time for transient simulation
-    fmin = 1.0*int(1.0/tstop) "Hz"  # minimum frequency for analysis
-    fmax = f0*ptsPerCycle/2 "Hz"    # maximum frequency for analysis
-    ptsPerDec = 2000                # number of frequency points per decade
-                                    # for the noise analysis
+    f0 (fₒ) = 2**17 "Hz"            — frequency of the modulating sinusoid
+    ampl = 100mV                    — amplitude of the modulating sinusoid
+    ptsPerCycle = 64                — number of desired points per cycle
+    cycles = 2048*16                — total number of cycles
+    T = 1.0/f0 "s"                  — period of one cycle
+    dt = T/ptsPerCycle "s"          — (desired) time between transient simulation samples
+    tstop = T*cycles "s"            — stop time for transient simulation
+    fmin = 1.0*int(1.0/tstop) "Hz"  — minimum frequency for analysis
+    fmax = f0*ptsPerCycle/2 "Hz"    — maximum frequency for analysis
+    ptsPerDec = 2000                — number of frequency points per decade
+                                    — for the noise analysis
 """
 # These simulation parameters are unusual because simulations involving
 # transient noise were run during the course of writing the paper, and the

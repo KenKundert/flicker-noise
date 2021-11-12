@@ -57,7 +57,7 @@ You can also run a simulation of the broken resistor model::
 You can view the signal and waveforms with::
 
    > list-psf -f pnoise.raw/pnoise.pnoise -l
-   > plot-psf out
+   > show-psf out
 
 My rather old version of Spectre (15.1.0) generated the following results:
 

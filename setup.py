@@ -12,7 +12,7 @@ dependencies = """
     numpy
     inform
     quantiphy>=2.16
-    psf-utils>=0.3
+    psf-utils>=1.5
     shlib
     svg_schematic>=0.7
 """

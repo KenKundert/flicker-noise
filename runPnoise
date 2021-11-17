@@ -50,12 +50,11 @@ Simulation Parameters:
 # PNoise analysis, and their values need not be so carefully chosen.
 
 # Imports {{{1
-from textwrap import dedent
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
 from numpy import sqrt
 from docopt import docopt
-from inform import Error, Inform, comment, display, done, fatal, os_error
+from inform import Error, Inform, comment, dedent, display, done, fatal, os_error
 from psf_utils import PSF
 from quantiphy import Quantity
 from shlib import Run, render_command, set_prefs as shlib_set_prefs, to_path

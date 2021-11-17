@@ -10,7 +10,7 @@ dependencies = """
     docopt
     matplotlib
     numpy
-    inform
+    inform>=1.26
     quantiphy>=2.16
     psf-utils>=1.5
     shlib

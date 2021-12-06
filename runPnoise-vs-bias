@@ -12,16 +12,15 @@ Options:
     -v, --verbose             turn on verbose mode
 
 Run a PNoise simulation on Verilog-A and built-in resistor models exhibiting
-flicker noise driven by a sinusoidal excitation.
+flicker noise driven by a sinusoidal excitation.  The model "res_va" in the 
+resistor.va file is used, as is the built-in spectre resistor model.
 
 The frequency and amplitude of the excitation are set by the variables f0 and
 ampl in this program.
 
-The model "res_va" in the resistor.va file is used, as is the built-in spectre
-resistor model. The simulation results match those in the paper "Flicker Noise
-Formulations in Verilog-A Compact Models" by G. J. Coram, C. C. McAndrew, K. K.
-Gullapalli, and K. S. Kundert. It has been accepted for publication in IEEE
-Trans. CAD some time in 2020.
+The simulation results were reported in the paper "Flicker Noise Formulations
+in Verilog-A Compact Models" by G. J. Coram, C. C. McAndrew, K. K. Gullapalli,
+and K. S. Kundert; IEEE Transactions on CAD, vol. 39, no. 10, October 2020.
 
 The file resistor.va preserves the sign of the modulation.  The simulation
 results are correct with the flicker noise being up-converted to f0.  With the

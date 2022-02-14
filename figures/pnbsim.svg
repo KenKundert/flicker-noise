@@ -22,7 +22,7 @@
     <path d="M -18.75 0 C -14.0625 -12.5 -4.6875 -12.5 0 0 4.6875 12.5 14.0625 12.5 18.75 0" fill="none" stroke="black" stroke-linecap="round" stroke-width="2"/>
   </g>
   <g id="text">
-    <text fill="black" font-family="sans-serif" font-size="18" text-anchor="start" x="-70.0" y="144.4">𝘈 sin(2π𝘧₀t)</text>
+    <text fill="black" font-family="sans-serif" font-size="18" text-anchor="start" x="-70.0" y="144.4">𝘈 sin(2π𝘧₀𝘵)</text>
   </g>
   <g id="wire">
     <polyline fill="none" points="-50.0,50.0 -75.0,50.0" stroke="black" stroke-linecap="round" stroke-width="2"/>
@@ -60,7 +60,7 @@
     <path d="M -18.75 0 C -14.0625 -12.5 -4.6875 -12.5 0 0 4.6875 12.5 14.0625 12.5 18.75 0" fill="none" stroke="black" stroke-linecap="round" stroke-width="2"/>
   </g>
   <g id="text">
-    <text fill="black" font-family="sans-serif" font-size="18" text-anchor="start" x="80.0" y="144.4">𝘈 sin(2π𝘧₀t)</text>
+    <text fill="black" font-family="sans-serif" font-size="18" text-anchor="start" x="80.0" y="144.4">𝘈 sin(2π𝘧₀𝘵)</text>
   </g>
   <g id="wire">
     <polyline fill="none" points="50.0,50.0 75.0,50.0" stroke="black" stroke-linecap="round" stroke-width="2"/>

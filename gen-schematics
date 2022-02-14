@@ -5,7 +5,7 @@ from inform import Error, error, os_error
 
 try:
     with Schematic(filename="figures/pnoise.svg", line_width=2):
-        vmod = Source(value="𝘈 sin(2π𝘧₀t)", kind="sine")
+        vmod = Source(value="𝘈 sin(2π𝘧₀𝘵)", kind="sine")
         r1 = Resistor(C=vmod.C, xoff=125, name="Rva", orient="v")
         r2 = Resistor(C=r1.C, xoff=125, name="Rref", orient="v")
         Wire([vmod.p, r2.p])
@@ -13,13 +13,13 @@ try:
 
     with Schematic(filename="figures/pnbsim.svg", right_pad=25, line_width=2):
         m = MOS(orient='h-|')
-        vs = Source(n=m.s, xoff=-25, value="𝘈 sin(2π𝘧₀t)", kind="sine", orient='v-')
+        vs = Source(n=m.s, xoff=-25, value="𝘈 sin(2π𝘧₀𝘵)", kind="sine", orient='v-')
         Wire([m.s, vs.n])
         Ground(C=vs.p)
         vg = Source(p=m.g, xoff=-125, value="3V", kind="vdc")
         Wire([m.g, vg.p])
         Ground(C=vg.n)
-        vd = Source(p=m.d, xoff=25, value="𝘈 sin(2π𝘧₀t)", kind="sine", orient='v')
+        vd = Source(p=m.d, xoff=25, value="𝘈 sin(2π𝘧₀𝘵)", kind="sine", orient='v')
         Wire([m.d, vd.p])
         Ground(C=vd.n)
 

@@ -106,9 +106,9 @@ with Quantity.prefs(prec="full", form='sia', spacer="", unity_sf="_"):
         Rva    (n 0) res_va
         Rref   (n 0) rref r=100.0
 
-        noise  noise start={fmin} stop={fmax} dec={ptsPerDec} oprobe=Vmod
-        pss    pss fund={f0} maxacfreq={fmax}
-        pnoise pnoise start={fmin} stop={fmax} dec={ptsPerDec} maxsideband=10 oprobe=Vmod
+        noise        noise start={fmin} stop={fmax} dec={ptsPerDec} oprobe=Vmod
+        pss          pss fund={f0} maxacfreq={fmax}
+        pnoise       pnoise start={fmin} stop={fmax} dec={ptsPerDec} maxsideband=10 oprobe=Vmod
     """)
     netlist_file.write_text(netlist)
 
@@ -124,9 +124,7 @@ try:
     comment("   ", render_command(sim_cmd, {"=log": 1, "-format": 1}))
     spectre = Run(sim_cmd, "sOEW0")
 except Error as e:
-    if e.stdout:
-        comment(e.stdout)
-    e.terminate(culprit=spectre_exe, codicil=f"See {log_file} for more information.")
+    e.terminate(culprit=spectre_exe, codicil=f"See {log_file} for the details")
 
 # plot results {{{1
 try:

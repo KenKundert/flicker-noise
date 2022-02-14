@@ -2,9 +2,11 @@
 //
 //  This model demonstrates the wrong way to model flicker noise. It gives
 //  correct results in noise analyses but the wrong results in pnoise analyses.
-//  The issue is described in "Flicker Noise Formulations in Compact Models", to
-//  be published in Transactions on Computer-Aided Design of Integrated Circuits
-//  and Systems some time in 2020.
+//  The issue is described in:
+//
+//     Flicker Noise Formulations in Verilog-A Compact Models
+//     G. J. Coram, C. C. McAndrew, K. K.  Gullapalli, and K. S. Kundert
+//     IEEE Transactions on CAD, vol. 39, no. 10, October 2020
 //
 //  DO NOT USE THIS MODEL.
 //

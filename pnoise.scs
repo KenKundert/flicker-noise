@@ -10,6 +10,6 @@ Vmod   (n 0) vsource type=sine dc=1.0 sinedc=0.0 ampl=100mV freq=131.072kHz
 Rva    (n 0) res_va
 Rref   (n 0) rref r=100.0
 
-noise  noise start=4_Hz stop=4.194304MHz dec=2k oprobe=Vmod
-pss    pss fund=131.072kHz maxacfreq=4.194304MHz
-pnoise pnoise start=4_Hz stop=4.194304MHz dec=2k maxsideband=10 oprobe=Vmod
+noise        noise start=4_Hz stop=4.194304MHz dec=2k oprobe=Vmod
+pss          pss fund=131.072kHz maxacfreq=4.194304MHz
+pnoise       pnoise start=4_Hz stop=4.194304MHz dec=2k maxsideband=10 oprobe=Vmod

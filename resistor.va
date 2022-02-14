@@ -1,9 +1,11 @@
-//  Resistor model with both thermal and flicker noise
+// Resistor model with both thermal and flicker noise
 //
-//  This model demonstrates the correct way to model flicker noise. It gives
-//  correct results in both noise and pnoise analyses as described in "Flicker
-//  Noise Formulations in Compact Models", to be published in Transactions on
-//  Computer-Aided Design of Integrated Circuits and Systems some time in 2020.
+// This model demonstrates the correct way to model flicker noise. It gives
+// correct results in both noise and pnoise analyses as described in:
+//
+//     Flicker Noise Formulations in Verilog-A Compact Models
+//     G. J. Coram, C. C. McAndrew, K. K.  Gullapalli, and K. S. Kundert
+//     IEEE Transactions on CAD, vol. 39, no. 10, October 2020
 
 `include "disciplines.vams"
 `include "constants.vams"

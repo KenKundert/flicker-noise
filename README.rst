@@ -8,9 +8,9 @@ Flicker Noise Formulations in Compact Models
 Includes a resistor model that demonstrates how to properly model flicker noise 
 in Verilog-A as described in:
 
-| `Flicker Noise Formulations in Compact Models <https://kenkundert.com/docs/tcad20-flicker-noise.pdf>`_;
-| G. J. Coram, C. C. McAndrew, K. K. Gullapalli, and K. S. Kundert;
-| IEEE Transactions on CAD, vol. 39, no. 10, October 2020.
+  | `Flicker Noise Formulations in Compact Models <https://kenkundert.com/docs/tcad20-flicker-noise.pdf>`_;
+  | G. J. Coram, C. C. McAndrew, K. K. Gullapalli, and K. S. Kundert;
+  | IEEE Transactions on CAD, vol. 39, no. 10, October 2020.
 
 Also included are two circuits. The first is a simple test circuit for the 
 resistor model.  Here Rva is the Verilog-A model and Rref is the resistor model 

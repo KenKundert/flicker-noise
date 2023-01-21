@@ -1,0 +1,12 @@
+# This file is used to install the dependencies for runPnoise and runBSIM.
+# You can get the dependencies using either of the following commands:
+#     pip3 install -r requirements
+
+docopt
+matplotlib
+numpy
+inform>=1.26
+quantiphy>=2.16
+psf-utils>=1.5
+shlib
+svg_schematic>=0.7

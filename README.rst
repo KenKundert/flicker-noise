@@ -34,12 +34,11 @@ If you have Python 3.6 or later, you can also run the simulation scripts, which
 re-generate the netlists, run the simulations (in Spectre), and plot the 
 results.
 
-To install the script dependencies, from the directory that contains setup.py,
-run::
+To install the script dependencies, run::
 
-   pip3 install --user .
+   pip install -r requirements
 
-This installs all dependencies into ~/.local/lib.  Then simply run::
+Then simply run::
 
    ./runPnoise
 

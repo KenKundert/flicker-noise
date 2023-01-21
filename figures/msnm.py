@@ -1,8 +1,6 @@
 # Generates schematic as an .svg file.
 # Requires svg_schematic:
-#     git clone https://github.com/KenKundert/svg_schematic.git
-#     cd svg-schematic
-#     python3 setup.py --user --upgrade install
+#     pip install svg-schematic
 
 from svg_schematic import (
     Schematic, shift, shift_x, shift_y, midpoint, Box, Ground, Label, Source, Wire
